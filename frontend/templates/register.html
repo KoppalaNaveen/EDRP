@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+
+<div class="login-container">
+
+    <div class="login-card" style="max-width: 600px;">
+
+        <h2>Create Account</h2>
+
+        <p>Register to Expert Decision Replay Platform</p>
+
+        <form method="POST">
+
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label>Full Name</label>
+                    <input type="text"
+                           name="full_name"
+                           class="form-control"
+                           placeholder="Enter your full name"
+                           required>
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label>Email</label>
+                    <input type="email"
+                           name="email"
+                           class="form-control"
+                           placeholder="Enter your email"
+                           required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label>Phone Number</label>
+                    <input type="text"
+                           name="phone"
+                           class="form-control"
+                           placeholder="Enter phone number"
+                           required>
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label>Designation</label>
+                    <input type="text"
+                           name="designation"
+                           class="form-control"
+                           placeholder="Enter designation"
+                           required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label>Role ID</label>
+                    <input type="number"
+                           name="role_id"
+                           class="form-control"
+                           placeholder="Example: 1"
+                           required>
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label>Team ID</label>
+                    <input type="number"
+                           name="team_id"
+                           class="form-control"
+                           placeholder="Example: 1"
+                           required>
+                </div>
+            </div>
+
+            <div class="form-group mt-2">
+                <label>Password</label>
+                <input type="password"
+                       name="password"
+                       class="form-control"
+                       placeholder="Create password"
+                       required>
+            </div>
+
+            <button class="btn btn-primary mt-3" type="submit">
+                Register
+            </button>
+
+        </form>
+
+        <div class="register-link">
+            Already have an account?
+            <a href="/login">Login Here</a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

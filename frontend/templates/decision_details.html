@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{{ url_for('decisions') }}" class="text-decoration-none"><i class="bi bi-arrow-left"></i> Back to Decisions</a>
+</div>
+
+<div class="row">
+    <!-- Left Column: Decision Details -->
+    <div class="col-md-4">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Decision Details</h5>
+                <span id="decisionStatusBadge" class="badge bg-light text-dark">Loading...</span>
+            </div>
+            <div class="card-body">
+                <h4 id="detailTitle" class="fw-bold mb-3">Loading...</h4>
+                <p id="detailDescription" class="text-muted"></p>
+                <hr>
+                <div class="mb-2">
+                    <small class="text-muted fw-bold">Created By:</small> <span id="detailCreator">...</span>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted fw-bold">Date:</small> <span id="detailDate">...</span>
+                </div>
+                
+                <div class="mt-4">
+                    <label class="form-label fw-semibold">Update Status</label>
+                    <select id="statusSelect" class="form-select mb-2">
+                        <option value="Pending">Pending</option>
+                        <option value="Under Review">Under Review</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                        <option value="Archived">Archived</option>
+                    </select>
+                    <button class="btn btn-outline-primary w-100" onclick="updateStatus()">Save Status</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Alternatives -->
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom-0">
+                <h5 class="mb-0 text-primary fw-bold">Alternatives Analysis</h5>
+                <button class="btn btn-sm btn-primary" onclick="openAlternativeModal()">
+                    <i class="bi bi-plus"></i> Add Alternative
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Title</th>
+                                <th>Cost</th>
+                                <th>Risk</th>
+                                <th>Feasibility</th>
+                                <th class="text-end pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alternativesTableBody">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alternative Add/Edit Modal -->
+<div class="modal fade" id="alternativeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold" id="altModalTitle">Add Alternative</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="altId">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Title</label>
+                    <input type="text" id="altTitle" class="form-control" placeholder="e.g. Migrate to AWS">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Description</label>
+                    <textarea id="altDescription" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold text-success">Pros</label>
+                        <textarea id="altPros" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold text-danger">Cons</label>
+                        <textarea id="altCons" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-semibold">Estimated Cost ($)</label>
+                        <input type="number" id="altCost" class="form-control" step="0.01">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-semibold">Risk Level</label>
+                        <select id="altRisk" class="form-select">
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-semibold">Feasibility Score (1-10)</label>
+                        <input type="number" id="altFeasibility" class="form-control" min="1" max="10">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveAlternative()">Save Alternative</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://127.0.0.1:8000";
+    const DECISION_ID = "{{ decision_id }}";
+</script>
+<script src="{{ url_for('static', filename='js/decision_details.js') }}"></script>
+{% endblock %}

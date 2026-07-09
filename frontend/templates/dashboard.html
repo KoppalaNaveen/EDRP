@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">
+        Welcome, {{ dashboard.user }}
+    </h2>
+
+    <div class="row">
+
+        <div class="col-md-4">
+            <div class="card shadow dashboard-card bg-primary text-white">
+                <div class="card-body">
+                    <h5>Total Decisions</h5>
+                    <h1>{{ dashboard.total_decisions }}</h1>
+                </div>
+            </div>
+        </div>
+
+        {% if session.get("role_name") == "Admin" or session.get("role_name") == "Manager" %}
+        <div class="col-md-4">
+            <div class="card shadow dashboard-card bg-warning text-dark border-0">
+                <div class="card-body">
+                    <h5>Pending Reviews</h5>
+                    <h1>{{ dashboard.pending_reviews }}</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow dashboard-card bg-success text-white border-0">
+                <div class="card-body">
+                    <h5>Total Replays</h5>
+                    <h1>{{ dashboard.total_replays }}</h1>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <br>
+
+    <div class="card shadow">
+        <div class="card-header bg-dark text-white">
+            User Information
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-bordered">
+
+                <tr>
+                    <th>Name</th>
+                    <td>{{ dashboard.user }}</td>
+                </tr>
+
+                <tr>
+                    <th>Role</th>
+                    <td>{{ dashboard.role }}</td>
+                </tr>
+
+                <tr>
+                    <th>Team</th>
+                    <td>{{ dashboard.team }}</td>
+                </tr>
+
+            </table>
+
+        </div>
+    </div>
+
+    <br>
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white">
+            Recent Decisions
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-striped">
+
+                <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Status</th>
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for decision in dashboard.recent_decisions %}
+
+                <tr>
+
+                    <td>{{ decision.id }}</td>
+                    <td>{{ decision.title }}</td>
+                    <td>{{ decision.status }}</td>
+
+                </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <br>
+
+    <div class="card shadow">
+
+        <div class="card-header bg-success text-white">
+            Recent Reviews
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-striped">
+
+                <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>Decision</th>
+                    <th>Status</th>
+                    <th>Comments</th>
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for review in dashboard.recent_reviews %}
+
+                <tr>
+
+                    <td>{{ review.id }}</td>
+                    <td>{{ review.decision_id }}</td>
+                    <td>{{ review.status }}</td>
+                    <td>{{ review.comments }}</td>
+
+                </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <br>
+
+    <div class="card shadow">
+
+        <div class="card-header bg-secondary text-white">
+            Recent Replays
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-striped">
+
+                <thead>
+
+                <tr>
+
+                    <th>ID</th>
+                    <th>Decision</th>
+                    <th>Action</th>
+
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% if dashboard.recent_replays %}
+
+                    {% for replay in dashboard.recent_replays %}
+
+                    <tr>
+
+                        <td>{{ replay.id }}</td>
+                        <td>{{ replay.decision_id }}</td>
+                        <td>{{ replay.action }}</td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <tr>
+
+                        <td colspan="3" class="text-center">
+                            No Replays Available
+                        </td>
+
+                    </tr>
+
+                {% endif %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

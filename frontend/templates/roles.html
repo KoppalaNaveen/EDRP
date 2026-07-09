@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/roles.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2>Role Management</h2>
+
+        <button
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#roleModal">
+
+            + Add Role
+
+        </button>
+
+    </div>
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <span>Available Roles</span>
+            <input type="text" id="roleSearch" class="form-control w-25 form-control-sm" placeholder="Search Roles..." onkeyup="handleSearch()">
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-hover">
+
+                <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>Role Name</th>
+
+                        <th>Description</th>
+
+                        <th width="180">
+
+                            Actions
+
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="roleTable">
+
+                </tbody>
+
+            </table>
+
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <span id="pageInfo">Page 1 of 1</span>
+            <div>
+                <button class="btn btn-sm btn-outline-secondary" id="prevPageBtn" onclick="prevPage()">Previous</button>
+                <button class="btn btn-sm btn-outline-secondary" id="nextPageBtn" onclick="nextPage()">Next</button>
+            </div>
+        </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Modal -->
+
+<div
+class="modal fade"
+id="roleModal">
+
+<div class="modal-dialog">
+
+<div class="modal-content">
+
+<div class="modal-header">
+
+<h5 id="roleModalTitle">Add Role</h5>
+
+<button
+class="btn-close"
+data-bs-dismiss="modal">
+</button>
+
+</div>
+
+<div class="modal-body">
+<input type="hidden" id="roleId">
+
+<input
+id="roleName"
+class="form-control mb-3"
+placeholder="Role Name">
+
+<textarea
+id="roleDescription"
+class="form-control"
+placeholder="Description">
+</textarea>
+
+</div>
+
+<div class="modal-footer">
+
+<button
+class="btn btn-success"
+onclick="saveRole()">
+
+Save
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/role.js') }}"></script>
+
+{% endblock %}

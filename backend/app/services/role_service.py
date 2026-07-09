@@ -1,0 +1,108 @@
+from sqlalchemy.orm import Session
+from fastapi import HTTPException, status
+
+from app.schemas.role import RoleCreate, RoleUpdate
+from app.repositories.role_repository import RoleRepository
+
+
+class RoleService:
+
+    @staticmethod
+    def get_all_roles(db: Session):
+        return RoleRepository.get_all_roles(db)
+
+    @staticmethod
+    def get_role_by_id(db: Session, role_id: int):
+
+        role = RoleRepository.get_role_by_id(db, role_id)
+
+        if not role:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Role not found"
+            )
+
+        return role
+
+    @staticmethod
+    def create_role(db: Session, role: RoleCreate):
+
+        existing_role = RoleRepository.get_role_by_name(
+            db,
+            role.role_name
+        )
+
+        if existing_role:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Role already exists"
+            )
+
+        return RoleRepository.create_role(
+            db,
+            role
+        )
+
+    @staticmethod
+    def update_role(
+        db: Session,
+        role_id: int,
+        role: RoleUpdate
+    ):
+
+        existing_role = RoleRepository.get_role_by_id(
+            db,
+            role_id
+        )
+
+        if not existing_role:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Role not found"
+            )
+
+        if role.role_name:
+
+            duplicate = RoleRepository.get_role_by_name(
+                db,
+                role.role_name
+            )
+
+            if duplicate and duplicate.id != role_id:
+
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Role name already exists"
+                )
+
+        return RoleRepository.update_role(
+            db,
+            role_id,
+            role
+        )
+
+    @staticmethod
+    def delete_role(
+        db: Session,
+        role_id: int
+    ):
+
+        existing_role = RoleRepository.get_role_by_id(
+            db,
+            role_id
+        )
+
+        if not existing_role:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Role not found"
+            )
+
+        RoleRepository.delete_role(
+            db,
+            role_id
+        )
+
+        return {
+            "message": "Role deleted successfully"
+        }

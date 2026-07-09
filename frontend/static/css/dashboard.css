@@ -1,0 +1,35 @@
+.dashboard-card{
+
+    border-radius:12px;
+
+    transition:.3s;
+
+    margin-bottom:20px;
+
+}
+
+.dashboard-card:hover{
+
+    transform:translateY(-5px);
+
+}
+
+.card{
+
+    border:none;
+
+}
+
+.card-header{
+
+    font-weight:bold;
+
+    font-size:18px;
+
+}
+
+table{
+
+    margin-bottom:0;
+
+}
