@@ -5,7 +5,7 @@ from typing import Optional
 class ProfileResponse(BaseModel):
     id: int
     full_name: str
-    email: EmailStr
+    email: str
     phone: Optional[str] = None
     designation: Optional[str] = None
     role: str

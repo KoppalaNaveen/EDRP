@@ -11,12 +11,17 @@ class UserRepository:
         return db.query(User).filter(User.email == email).first()
 
     @staticmethod
+    def get_user_by_employee_id(db: Session, employee_id: str):
+        return db.query(User).filter(User.employee_id == employee_id).first()
+
+    @staticmethod
     def create_user(db: Session, user: UserRegister, hashed_password: str):
 
         new_user = User(
             full_name=user.full_name,
             email=user.email,
             password=hashed_password,
+            employee_id=user.employee_id,
             role_id=user.role_id,
             team_id=user.team_id,
             designation=user.designation,

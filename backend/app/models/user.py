@@ -21,6 +21,8 @@ class User(Base):
 
     email = Column(String(100), unique=True, nullable=False)
 
+    employee_id = Column(String(50))
+
     password = Column(String(255), nullable=False)
 
     role_id = Column(Integer, ForeignKey("roles.id"), nullable = False)

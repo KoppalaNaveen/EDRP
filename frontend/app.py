@@ -24,7 +24,7 @@ API_URL = "http://127.0.0.1:8000"
 
 @app.route("/")
 def home():
-    return redirect(url_for("login"))
+    return render_template("landing.html")
 
 
 # ===========================
@@ -37,7 +37,7 @@ def login():
     if request.method == "POST":
 
         payload = {
-            "email": request.form["email"],
+            "employee_id": request.form["employee_id"],
             "password": request.form["password"]
         }
 
@@ -55,12 +55,17 @@ def login():
             session["token"] = token["access_token"]
             session["user_id"] = token["user_id"]
             session["role_name"] = token.get("role_name", "User")
+            full_name = token.get("full_name", "User")
+            session["full_name"] = full_name
+            
+            parts = full_name.split()
+            session["initials"] = (parts[0][0] + (parts[-1][0] if len(parts) > 1 else "")).upper()
 
             flash("Login Successful", "success")
 
             return redirect(url_for("dashboard"))
 
-        flash("Invalid Email or Password", "danger")
+        flash("Invalid Employee ID or Password", "danger")
 
     return render_template("login.html")
 
@@ -79,9 +84,10 @@ def register():
             "email": request.form["email"],
             "password": request.form["password"],
             "role_id": int(request.form["role_id"]),
-            "team_id": int(request.form["team_id"]),
-            "designation": request.form["designation"],
-            "phone": request.form["phone"]
+            "team_id": int(request.form.get("team_id", 1)),
+            "employee_id": request.form.get("employee_id", ""),
+            "designation": request.form.get("designation", ""),
+            "phone": request.form.get("phone", "")
         }
 
         response = requests.post(
@@ -127,8 +133,16 @@ def dashboard():
     if response.status_code == 200:
         dashboard = response.json()
 
+    role = session.get("role_name", "User")
+    if role == "Manager":
+        template = "manager_dashboard.html"
+    elif role == "Administrator" or role == "Admin":
+        template = "dashboard.html"
+    else:
+        template = "employee_dashboard.html"
+
     return render_template(
-        "dashboard.html",
+        template,
         dashboard=dashboard
     )
 

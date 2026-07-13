@@ -1,64 +1,293 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - EDRP Decision Platform</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8FAFC;
+            color: #0F172A;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Navbar */
+        .navbar-custom {
+            background-color: #FFFFFF;
+            border-bottom: 1px solid #F1F5F9;
+            padding: 16px 40px;
+        }
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #2563EB;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .brand-text-top {
+            font-size: 15px;
+            font-weight: 800;
+            color: #0F172A;
+            line-height: 1;
+        }
+        .brand-text-bottom {
+            font-size: 11px;
+            color: #94A3B8;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+        .nav-right-text {
+            font-size: 13px;
+            color: #64748B;
+            font-weight: 500;
+        }
+        .nav-right-link {
+            color: #2563EB;
+            font-weight: 700;
+            text-decoration: none;
+        }
+        .nav-right-link:hover {
+            text-decoration: underline;
+        }
 
-{% block content %}
+        /* Login Card */
+        .login-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .login-card {
+            background: #FFFFFF;
+            border-radius: 20px;
+            padding: 48px;
+            width: 100%;
+            max-width: 460px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+            border: 1px solid #F1F5F9;
+        }
+        .login-title {
+            font-size: 28px;
+            font-weight: 900;
+            color: #0F172A;
+            letter-spacing: -0.03em;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .login-subtitle {
+            font-size: 14px;
+            color: #64748B;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+        
+        .form-label-custom {
+            font-size: 11px;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .input-group-custom {
+            display: flex;
+            align-items: center;
+            border: 1px solid #E2E8F0;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #FFFFFF;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .input-group-custom:focus-within {
+            border-color: #2563EB;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .input-icon {
+            padding: 0 16px;
+            color: #94A3B8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .input-field {
+            flex: 1;
+            border: none;
+            padding: 12px 16px 12px 0;
+            font-size: 14px;
+            color: #0F172A;
+            outline: none;
+            background: transparent;
+        }
+        .input-field::placeholder {
+            color: #94A3B8;
+        }
+        
+        .check-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            margin-bottom: 24px;
+        }
+        .remember-label {
+            font-size: 13px;
+            color: #475569;
+            margin-left: 8px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .forgot-link {
+            font-size: 13px;
+            color: #2563EB;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
 
-<div class="login-container">
+        .btn-submit {
+            background-color: #2563EB;
+            color: #FFFFFF;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            width: 100%;
+            transition: background 0.2s;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+        .btn-submit:hover {
+            background-color: #1D4ED8;
+        }
 
-    <div class="login-card">
+        .security-text {
+            font-size: 11px;
+            color: #94A3B8;
+            text-align: center;
+            margin-top: 32px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
 
-        <h2>Login</h2>
-
-        <p>Sign in to Expert Decision Replay Platform</p>
-
-        <form method="POST">
-
-            <div class="form-group">
-
-                <label>Email</label>
-
-                <input
-                    type="email"
-                    name="email"
-                    class="form-control"
-                    placeholder="Enter your email"
-                    required
-                >
-
+    <!-- Navbar -->
+    <nav class="navbar-custom d-flex justify-content-between align-items-center">
+        <a href="{{ url_for('home') }}" class="navbar-brand">
+            <div class="logo-icon">
+                <i data-lucide="zap" style="color: white; width: 22px; height: 22px;"></i>
             </div>
-
-            <div class="form-group">
-
-                <label>Password</label>
-
-                <input
-                    type="password"
-                    name="password"
-                    class="form-control"
-                    placeholder="Enter your password"
-                    required
-                >
-
+            <div>
+                <div class="brand-text-top">EDRP</div>
+                <div class="brand-text-bottom">Decision Platform</div>
             </div>
+        </a>
 
-            <button type="submit" class="btn btn-primary">
-                Login
-            </button>
-
-        </form>
-
-        <div class="register-link">
-
-            <p>
-                Don't have an account?
-                <a href="{{ url_for('register') }}">
-                    Register Here
-                </a>
-            </p>
-
+        <div class="nav-right-text">
+            Don't have an account? <a href="{{ url_for('register') }}" class="nav-right-link">Register</a>
         </div>
+    </nav>
 
+    <!-- Login Content -->
+    <div class="login-wrapper">
+        <div class="login-card">
+            <h2 class="login-title">Welcome Back</h2>
+            <p class="login-subtitle">Sign in to your enterprise account</p>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} small py-2 mb-4" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <!-- Employee ID -->
+                <div class="mb-4">
+                    <label class="form-label-custom">Employee ID</label>
+                    <div class="input-group-custom">
+                        <div class="input-icon">
+                            <i data-lucide="user" style="width: 18px; height: 18px;"></i>
+                        </div>
+                        <input type="text" name="employee_id" class="input-field" placeholder="EMP1024" required>
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label class="form-label-custom">Password</label>
+                    <div class="input-group-custom">
+                        <div class="input-icon">
+                            <i data-lucide="lock" style="width: 18px; height: 18px;"></i>
+                        </div>
+                        <input type="password" name="password" id="password" class="input-field" placeholder="••••••••••••" required>
+                        <div class="input-icon" id="togglePassword" style="cursor: pointer;">
+                            <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Remember Me & Forgot Password -->
+                <div class="check-wrapper">
+                    <div class="d-flex align-items-center">
+                        <input type="checkbox" id="rememberMe" style="width: 16px; height: 16px; accent-color: #2563EB;">
+                        <label for="rememberMe" class="remember-label">Remember me</label>
+                    </div>
+                    <a href="#" class="forgot-link">Forgot password?</a>
+                </div>
+
+                <!-- Sign In Button -->
+                <button type="submit" class="btn-submit">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="security-text">
+                Protected by enterprise-grade security - v3.2.1
+            </div>
+        </div>
     </div>
 
-</div>
+    <script>
+        lucide.createIcons();
+        
+        // Password visibility toggle
+        const togglePassword = document.getElementById('togglePassword');
+        const password = document.getElementById('password');
 
-{% endblock %}
+        togglePassword.addEventListener('click', function (e) {
+            // toggle the type attribute
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            // We can keep the same eye icon, or change it. Keeping it simple.
+        });
+    </script>
+</body>
+</html>

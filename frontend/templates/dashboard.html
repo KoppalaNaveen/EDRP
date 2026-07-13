@@ -1,226 +1,1138 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrator Dashboard - EDRP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8FAFC;
+            color: #0F172A;
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
 
-{% block content %}
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background-color: #1E293B; /* Slightly different dark blue for Admin */
+            color: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+        }
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 24px;
+            text-decoration: none;
+        }
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background-color: #6366F1; /* Admin Purple */
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo-text-top {
+            font-size: 14px;
+            font-weight: 800;
+            color: #FFFFFF;
+            line-height: 1;
+        }
+        .logo-text-bottom {
+            font-size: 10px;
+            color: #94A3B8;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+        .nav-links {
+            list-style: none;
+            padding: 0 12px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .nav-links::-webkit-scrollbar { width: 4px; }
+        .nav-links::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            color: #94A3B8;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #FFFFFF;
+        }
+        .nav-item.active {
+            background-color: #6366F1; /* Admin Purple */
+            color: #FFFFFF;
+        }
+        .user-profile-bottom {
+            margin-top: auto;
+            padding: 16px 24px;
+            border-top: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #6366F1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+        }
+        .user-info {
+            flex: 1;
+        }
+        .user-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+        .user-role {
+            font-size: 11px;
+            color: #94A3B8;
+        }
 
-<div class="container mt-4">
+        /* Main Content Styles */
+        .main-wrapper {
+            margin-left: 260px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background-color: transparent;
+        }
+        .breadcrumb-nav {
+            margin: 0;
+            font-size: 11px;
+            font-weight: 600;
+            color: #94A3B8;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 8px 16px;
+            width: 300px;
+        }
+        .search-bar input {
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 13px;
+            margin-left: 8px;
+            width: 100%;
+        }
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .main-content {
+            padding: 0 40px 40px;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 900;
+            color: #0F172A;
+            letter-spacing: -0.02em;
+            margin-bottom: 24px;
+        }
 
-    <h2 class="mb-4">
-        Welcome, {{ dashboard.user }}
-    </h2>
+        .role-banner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            border: 1px solid #F1F5F9;
+            border-radius: 12px;
+            padding: 12px 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .role-banner-accent {
+            width: 4px;
+            height: 36px;
+            background: linear-gradient(180deg, #6366F1, #818CF8);
+            border-radius: 2px;
+        }
 
-    <div class="row">
+        /* Stats Grid - 6 columns */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #F1F5F9;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+        .stat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: 900;
+            color: #0F172A;
+            margin-bottom: 4px;
+        }
+        .stat-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #1E293B;
+            margin-bottom: 2px;
+            white-space: nowrap;
+        }
+        .stat-desc {
+            font-size: 10px;
+            color: #94A3B8;
+        }
 
-        <div class="col-md-4">
-            <div class="card shadow dashboard-card bg-primary text-white">
-                <div class="card-body">
-                    <h5>Total Decisions</h5>
-                    <h1>{{ dashboard.total_decisions }}</h1>
+        /* Section Cards */
+        .section-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid #F1F5F9;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            margin-bottom: 24px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #0F172A;
+            margin-bottom: 2px;
+        }
+        .section-subtitle {
+            font-size: 12px;
+            color: #94A3B8;
+        }
+
+        /* Analytics Section Layout */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        .analytics-subgrid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
+        }
+        
+        .chart-placeholder {
+            width: 100%;
+            height: 200px;
+            background: #F8FAFC;
+            border: 1px dashed #E2E8F0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94A3B8;
+            font-size: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Simulated Charts */
+        .mock-line-chart {
+            position: absolute;
+            bottom: 0; left: 0; right: 0; top: 0;
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0) 100%);
+            border-top: 2px solid #6366F1;
+            clip-path: polygon(0 40%, 20% 35%, 40% 45%, 60% 25%, 80% 30%, 100% 10%, 100% 100%, 0 100%);
+        }
+        .mock-line-chart-2 {
+            position: absolute;
+            bottom: 0; left: 0; right: 0; top: 0;
+            border-top: 2px solid #10B981;
+            clip-path: polygon(0 50%, 20% 45%, 40% 55%, 60% 40%, 80% 45%, 100% 30%, 100% 100%, 0 100%);
+            background: transparent;
+        }
+        
+        .mock-bar-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 100%;
+            padding: 20px 10px 0;
+        }
+        .mock-bar {
+            width: 12%;
+            background: #6366F1;
+            border-radius: 4px 4px 0 0;
+        }
+
+        /* Approval Flow Bars */
+        .flow-item {
+            margin-bottom: 12px;
+        }
+        .flow-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            margin-bottom: 4px;
+            color: #475569;
+        }
+        .flow-track {
+            height: 6px;
+            background: #F1F5F9;
+            border-radius: 3px;
+        }
+        .flow-fill {
+            height: 100%;
+            border-radius: 3px;
+        }
+
+        /* Lists Row (4 columns) */
+        .lists-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        
+        /* List Items */
+        .list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .log-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        .log-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .log-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 4px;
+        }
+        .log-content { flex: 1; }
+        .log-title { font-size: 12px; font-weight: 600; color: #1E293B; margin-bottom: 2px; }
+        .log-meta { font-size: 10px; color: #94A3B8; }
+        
+        .reg-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        .reg-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .reg-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; }
+        
+        .security-card {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid;
+            margin-bottom: 10px;
+            background: #F8FAFC;
+        }
+        
+        .task-card {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 10px;
+            background: #FFFFFF;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Decision Table */
+        .decision-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .decision-table th {
+            font-size: 10px;
+            font-weight: 700;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 1px solid #E2E8F0;
+            white-space: nowrap;
+        }
+        .decision-table td {
+            padding: 16px;
+            border-bottom: 1px solid #F1F5F9;
+            vertical-align: middle;
+        }
+
+        /* Quick Actions */
+        .qa-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 16px;
+        }
+        .qa-card {
+            background: white;
+            border: 1px solid #F1F5F9;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .qa-card:hover {
+            border-color: #CBD5E1;
+            transform: translateY(-2px);
+        }
+        .qa-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+        }
+        .qa-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #1E293B;
+        }
+
+        /* Utilities */
+        .bg-indigo-light { background: #EEF2FF; color: #4F46E5; }
+        .bg-purple-light { background: #F5F3FF; color: #8B5CF6; }
+        .bg-orange-light { background: #FFFBEB; color: #F59E0B; }
+        .bg-green-light { background: #ECFDF5; color: #10B981; }
+        .bg-pink-light { background: #FDF2F8; color: #DB2777; }
+        .bg-teal-light { background: #F0FDFA; color: #14B8A6; }
+        .bg-blue-light { background: #EFF6FF; color: #2563EB; }
+        .bg-red-light { background: #FEF2F2; color: #EF4444; }
+
+        .badge-pill {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <a href="#" class="sidebar-logo">
+            <div class="logo-icon">
+                <i data-lucide="zap" style="color: white; width: 18px; height: 18px;"></i>
+            </div>
+            <div>
+                <div class="logo-text-top">EDRP</div>
+                <div class="logo-text-bottom">Decision Platform</div>
+            </div>
+        </a>
+
+        <ul class="nav-links">
+            <li><a href="{{ url_for('dashboard') }}" class="nav-item active"><i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i> Dashboard</a></li>
+            <li><a href="{{ url_for('users') if 'users' in request.url_rule.endpoint else '#' }}" class="nav-item"><i data-lucide="users" style="width: 18px; height: 18px;"></i> User Management</a></li>
+            <li><a href="{{ url_for('roles') }}" class="nav-item"><i data-lucide="shield" style="width: 18px; height: 18px;"></i> Role Management</a></li>
+            <li><a href="{{ url_for('teams') }}" class="nav-item"><i data-lucide="users" style="width: 18px; height: 18px;"></i> Team Management</a></li>
+            <li><a href="{{ url_for('decisions') }}" class="nav-item"><i data-lucide="file-text" style="width: 18px; height: 18px;"></i> Decision Management</a></li>
+            <li><a href="{{ url_for('repository') }}" class="nav-item"><i data-lucide="database" style="width: 18px; height: 18px;"></i> Knowledge Repository</a></li>
+            <li><a href="{{ url_for('reports') }}" class="nav-item"><i data-lucide="bar-chart-2" style="width: 18px; height: 18px;"></i> Reports & Analytics</a></li>
+            <li><a href="{{ url_for('audit') }}" class="nav-item"><i data-lucide="clipboard-list" style="width: 18px; height: 18px;"></i> Audit Logs</a></li>
+            <li><a href="#" class="nav-item"><i data-lucide="settings" style="width: 18px; height: 18px;"></i> System Configuration</a></li>
+            <li><a href="#" class="nav-item"><i data-lucide="bell" style="width: 18px; height: 18px;"></i> Notifications</a></li>
+            <li><a href="{{ url_for('profile') }}" class="nav-item"><i data-lucide="user" style="width: 18px; height: 18px;"></i> Profile</a></li>
+        </ul>
+
+        <a href="{{ url_for('profile') }}" class="user-profile-bottom">
+            <div class="user-avatar">{{ session.get('initials', 'SA') }}</div>
+            <div class="user-info">
+                <div class="user-name">{{ session.get('full_name', 'S. Administrator') }}</div>
+                <div class="user-role">System Admin</div>
+            </div>
+            <i data-lucide="log-out" style="width: 16px; height: 16px; color: #94A3B8; margin-left: auto;" onclick="window.location.href=this.dataset.url; return false;" data-url="{{ url_for('logout') }}"></i>
+        </a>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
+        <div class="topbar">
+            <div class="breadcrumb-nav">
+                Home <i data-lucide="chevron-right" style="width: 12px; height: 12px;"></i> Administrator Dashboard
+            </div>
+            <div class="topbar-actions">
+                <div class="search-bar">
+                    <i data-lucide="search" style="width: 16px; height: 16px; color: #94A3B8;"></i>
+                    <input type="text" placeholder="Search across platform...">
+                    <div style="background: #F1F5F9; border-radius: 4px; padding: 2px 6px; font-size: 10px; color: #64748B; font-weight: 700;">⌘K</div>
                 </div>
+                <div style="position: relative; cursor: pointer;">
+                    <i data-lucide="bell" style="color: #64748B; width: 20px; height: 20px;"></i>
+                    <div style="position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: #EF4444; border-radius: 50%; border: 1px solid white;"></div>
+                </div>
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: #EEF2FF; border: 1px solid #C7D2FE; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #4F46E5;">{{ session.get('initials', 'JD') }}</div>
             </div>
         </div>
 
-        {% if session.get("role_name") == "Admin" or session.get("role_name") == "Manager" %}
-        <div class="col-md-4">
-            <div class="card shadow dashboard-card bg-warning text-dark border-0">
-                <div class="card-body">
-                    <h5>Pending Reviews</h5>
-                    <h1>{{ dashboard.pending_reviews }}</h1>
+        <div class="main-content">
+            <h1 class="page-title">Administrator Dashboard</h1>
+
+            <div class="role-banner">
+                <div class="role-banner-accent"></div>
+                <div>
+                    <div style="font-size: 13px; font-weight: 700; color: #0F172A;">Administrator Dashboard</div>
+                    <div style="font-size: 11px; color: #94A3B8; margin-top: 2px;">Organization-wide administration — users, decisions, audit logs and system monitoring.</div>
+                </div>
+                <div style="margin-left: auto; display: flex; align-items: center; gap: 8px; background: #EEF2FF; padding: 6px 12px; border-radius: 8px; border: 1px solid #E0E7FF;">
+                    <div style="width: 6px; height: 6px; border-radius: 50%; background: #4F46E5;"></div>
+                    <span style="font-size: 11px; font-weight: 700; color: #4F46E5;">System Administrator</span>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-4">
-            <div class="card shadow dashboard-card bg-success text-white border-0">
-                <div class="card-body">
-                    <h5>Total Replays</h5>
-                    <h1>{{ dashboard.total_replays }}</h1>
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="stat-icon bg-blue-light"><i data-lucide="users" style="width: 18px; height: 18px;"></i></div>
+                        <i data-lucide="arrow-up-right" style="width: 14px; height: 14px; color: #10B981;"></i>
+                    </div>
+                    <div class="stat-value">132</div>
+                    <div class="stat-label">Total Users</div>
+                    <div class="stat-desc">+12 this month</div>
+                </div>
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="stat-icon bg-purple-light"><i data-lucide="file-text" style="width: 18px; height: 18px;"></i></div>
+                        <i data-lucide="arrow-up-right" style="width: 14px; height: 14px; color: #10B981;"></i>
+                    </div>
+                    <div class="stat-value">{{ total_decisions|default('213') }}</div>
+                    <div class="stat-label">Total Decisions</div>
+                    <div class="stat-desc">Platform-wide</div>
+                </div>
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="stat-icon bg-orange-light"><i data-lucide="check-square" style="width: 18px; height: 18px;"></i></div>
+                        <i data-lucide="minus" style="width: 14px; height: 14px; color: #64748B;"></i>
+                    </div>
+                    <div class="stat-value">{{ pending_reviews|default('18') }}</div>
+                    <div class="stat-label">Pending Approvals</div>
+                    <div class="stat-desc">Needs attention</div>
+                </div>
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="stat-icon bg-green-light"><i data-lucide="activity" style="width: 18px; height: 18px;"></i></div>
+                        <i data-lucide="arrow-up-right" style="width: 14px; height: 14px; color: #10B981;"></i>
+                    </div>
+                    <div class="stat-value">47</div>
+                    <div class="stat-label">Active Sessions</div>
+                    <div class="stat-desc">Right now</div>
+                </div>
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="stat-icon bg-pink-light"><i data-lucide="database" style="width: 18px; height: 18px;"></i></div>
+                        <i data-lucide="arrow-up-right" style="width: 14px; height: 14px; color: #10B981;"></i>
+                    </div>
+                    <div class="stat-value">1.2k</div>
+                    <div class="stat-label">Audit Logs</div>
+                    <div class="stat-desc">Last 30 days</div>
+                </div>
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="stat-icon bg-teal-light"><i data-lucide="server" style="width: 18px; height: 18px;"></i></div>
+                        <i data-lucide="check" style="width: 14px; height: 14px; color: #10B981;"></i>
+                    </div>
+                    <div class="stat-value">99%</div>
+                    <div class="stat-label">System Health</div>
+                    <div class="stat-desc">All systems go</div>
                 </div>
             </div>
+
+            <!-- Organization Analytics -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div>
+                        <div class="section-title">Organization Analytics</div>
+                        <div class="section-subtitle">Decision trends, approval flow and platform usage — last 6 months</div>
+                    </div>
+                    <div style="display: flex; background: #F1F5F9; border-radius: 8px; padding: 2px;">
+                        <button style="border: none; background: #6366F1; color: white; border-radius: 6px; padding: 4px 12px; font-size: 11px; font-weight: 700; cursor: pointer;">6M</button>
+                        <button style="border: none; background: transparent; color: #64748B; border-radius: 6px; padding: 4px 12px; font-size: 11px; font-weight: 700; cursor: pointer;">1Y</button>
+                        <button style="border: none; background: transparent; color: #64748B; border-radius: 6px; padding: 4px 12px; font-size: 11px; font-weight: 700; cursor: pointer;">All</button>
+                    </div>
+                </div>
+
+                <div class="analytics-grid">
+                    <!-- Decision Trends Chart -->
+                    <div>
+                        <div style="font-size: 13px; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between;">
+                            <span>Decision Trends</span>
+                            <div style="display: flex; gap: 12px; font-size: 10px; font-weight: 500; color: #64748B;">
+                                <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #6366F1;"></span> Submitted</span>
+                                <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #10B981;"></span> Approved</span>
+                                <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #EF4444;"></span> Rejected</span>
+                            </div>
+                        </div>
+                        <div class="chart-placeholder">
+                            <div class="mock-line-chart"></div>
+                            <div class="mock-line-chart-2"></div>
+                            <!-- fake grid lines -->
+                            <div style="position: absolute; left: 30px; bottom: 20px; top: 10px; right: 10px; border-left: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0;">
+                                <div style="position: absolute; bottom: 33%; left: 0; right: 0; border-bottom: 1px dashed #E2E8F0;"></div>
+                                <div style="position: absolute; bottom: 66%; left: 0; right: 0; border-bottom: 1px dashed #E2E8F0;"></div>
+                            </div>
+                            <div style="position: absolute; left: 5px; top: 10px; font-size: 9px; color: #94A3B8; display: flex; flex-direction: column; justify-content: space-between; height: 170px;">
+                                <span>60</span><span>40</span><span>20</span><span>0</span>
+                            </div>
+                            <div style="position: absolute; left: 30px; bottom: 5px; right: 10px; font-size: 9px; color: #94A3B8; display: flex; justify-content: space-between;">
+                                <span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span><span>Jan</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Approval Flow -->
+                    <div>
+                        <div style="font-size: 13px; font-weight: 700; margin-bottom: 16px;">Approval Flow</div>
+                        <div class="flow-item">
+                            <div class="flow-header"><span>Submitted</span> <span><span style="color:#94A3B8;margin-right:4px;">100%</span> <b>213</b></span></div>
+                            <div class="flow-track"><div class="flow-fill" style="width: 100%; background: #94A3B8;"></div></div>
+                        </div>
+                        <div class="flow-item">
+                            <div class="flow-header"><span>In Review</span> <span><span style="color:#94A3B8;margin-right:4px;">66%</span> <b>140</b></span></div>
+                            <div class="flow-track"><div class="flow-fill" style="width: 66%; background: #3B82F6;"></div></div>
+                        </div>
+                        <div class="flow-item">
+                            <div class="flow-header"><span>Approved</span> <span><span style="color:#94A3B8;margin-right:4px;">87%</span> <b>185</b></span></div>
+                            <div class="flow-track"><div class="flow-fill" style="width: 87%; background: #10B981;"></div></div>
+                        </div>
+                        <div class="flow-item">
+                            <div class="flow-header"><span>Rejected</span> <span><span style="color:#94A3B8;margin-right:4px;">13%</span> <b>28</b></span></div>
+                            <div class="flow-track"><div class="flow-fill" style="width: 13%; background: #EF4444;"></div></div>
+                        </div>
+                        <div class="flow-item">
+                            <div class="flow-header"><span>Archived</span> <span><span style="color:#94A3B8;margin-right:4px;">22%</span> <b>48</b></span></div>
+                            <div class="flow-track"><div class="flow-fill" style="width: 22%; background: #CBD5E1;"></div></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="analytics-subgrid">
+                    <!-- Department Comparison -->
+                    <div>
+                        <div style="font-size: 13px; font-weight: 700; margin-bottom: 16px;">Department Comparison</div>
+                        <div class="chart-placeholder" style="height: 140px;">
+                            <div style="position: absolute; left: 20px; bottom: 20px; top: 10px; right: 10px; border-left: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0;">
+                                <div class="mock-bar-chart">
+                                    <div class="mock-bar" style="height: 80%; background: #6366F1;"></div>
+                                    <div class="mock-bar" style="height: 60%; background: #10B981;"></div>
+                                    <div class="mock-bar" style="height: 70%; background: #6366F1;"></div>
+                                    <div class="mock-bar" style="height: 50%; background: #10B981;"></div>
+                                    <div class="mock-bar" style="height: 40%; background: #6366F1;"></div>
+                                    <div class="mock-bar" style="height: 30%; background: #10B981;"></div>
+                                    <div class="mock-bar" style="height: 20%; background: #6366F1;"></div>
+                                </div>
+                            </div>
+                            <div style="position: absolute; left: 20px; bottom: 5px; right: 10px; font-size: 7px; color: #94A3B8; display: flex; justify-content: space-around;">
+                                <span>Tech</span><span>HR</span><span>Fin</span><span>Ops</span><span>Mktg</span><span>Sales</span><span>Legal</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Monthly Activity -->
+                    <div>
+                        <div style="font-size: 13px; font-weight: 700; margin-bottom: 16px;">Monthly Activity</div>
+                        <div class="chart-placeholder" style="height: 140px;">
+                            <div style="position: absolute; bottom: 0; left: 0; right: 0; top: 0; background: transparent; border-top: 2px solid #8B5CF6; clip-path: polygon(0 70%, 20% 65%, 40% 60%, 60% 50%, 80% 40%, 100% 20%, 100% 100%, 0 100%);"></div>
+                            <div style="position: absolute; left: 20px; bottom: 20px; top: 10px; right: 10px; border-left: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0;"></div>
+                            <div style="position: absolute; left: 20px; bottom: 5px; right: 10px; font-size: 8px; color: #94A3B8; display: flex; justify-content: space-between;">
+                                <span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span><span>Jan</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- System Usage -->
+                    <div>
+                        <div style="font-size: 13px; font-weight: 700; margin-bottom: 16px;">System Usage</div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div class="flow-item" style="margin-bottom: 8px;">
+                                <div class="flow-header"><span>CPU Usage</span> <span><b>38%</b></span></div>
+                                <div class="flow-track"><div class="flow-fill" style="width: 38%; background: #8B5CF6;"></div></div>
+                            </div>
+                            <div class="flow-item" style="margin-bottom: 8px;">
+                                <div class="flow-header"><span>Memory</span> <span><b>56%</b></span></div>
+                                <div class="flow-track"><div class="flow-fill" style="width: 56%; background: #6366F1;"></div></div>
+                            </div>
+                            <div class="flow-item" style="margin-bottom: 8px;">
+                                <div class="flow-header"><span>Disk Space</span> <span><b>29%</b></span></div>
+                                <div class="flow-track"><div class="flow-fill" style="width: 29%; background: #14B8A6;"></div></div>
+                            </div>
+                            <div class="flow-item" style="margin-bottom: 8px;">
+                                <div class="flow-header"><span>Network</span> <span><b>15%</b></span></div>
+                                <div class="flow-track"><div class="flow-fill" style="width: 15%; background: #F59E0B;"></div></div>
+                            </div>
+                        </div>
+                        <div style="border-top: 1px dashed #E2E8F0; padding-top: 8px; margin-top: 4px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 10px;">
+                                <div style="display: flex; justify-content: space-between;"><span style="color:#64748B;">API Response</span> <span style="color:#10B981; font-weight:600;">99.1%</span></div>
+                                <div style="display: flex; justify-content: space-between;"><span style="color:#64748B;">DB Uptime</span> <span style="color:#10B981; font-weight:600;">99.9%</span></div>
+                                <div style="display: flex; justify-content: space-between;"><span style="color:#64748B;">Avg Latency</span> <span style="color:#F59E0B; font-weight:600;">145ms</span></div>
+                                <div style="display: flex; justify-content: space-between;"><span style="color:#64748B;">Error Rate</span> <span style="color:#10B981; font-weight:600;">0.12%</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROW 5: 4 Columns lists -->
+            <div class="lists-grid" style="margin-bottom: 24px;">
+                <!-- Recent Audit Logs -->
+                <div class="section-card" style="margin-bottom: 0;">
+                    <div class="section-header" style="margin-bottom: 16px;">
+                        <div class="section-title">Recent Audit Logs</div>
+                        <a href="#" style="font-size: 11px; font-weight: 700; color: #2563EB; text-decoration: none;">View all →</a>
+                    </div>
+                    <div class="list-container">
+                        <div class="log-item">
+                            <div class="log-dot bg-blue-light"></div>
+                            <div class="log-content">
+                                <div class="log-title">Approved decision DEC-3140</div>
+                                <div class="log-meta">S. Chen • Decisions • 5 min ago</div>
+                            </div>
+                            <span class="badge-pill bg-gray-light">Info</span>
+                        </div>
+                        <div class="log-item">
+                            <div class="log-dot bg-orange-light"></div>
+                            <div class="log-content">
+                                <div class="log-title">Failed login attempt (3rd try)</div>
+                                <div class="log-meta">A. Patel • Auth • 15 min ago</div>
+                            </div>
+                            <span class="badge-pill bg-orange-light text-orange">Warning</span>
+                        </div>
+                        <div class="log-item">
+                            <div class="log-dot bg-blue-light"></div>
+                            <div class="log-content">
+                                <div class="log-title">Submitted DEC-3150 for review</div>
+                                <div class="log-meta">J. Doe • Decisions • 30 min ago</div>
+                            </div>
+                            <span class="badge-pill bg-gray-light">Info</span>
+                        </div>
+                        <div class="log-item">
+                            <div class="log-dot bg-orange-light"></div>
+                            <div class="log-title">Role permissions updated — Manager</div>
+                            <div class="log-meta">Admin • Roles • 1 hr ago</div>
+                        </div>
+                        <div class="log-item">
+                            <div class="log-dot bg-blue-light"></div>
+                            <div class="log-content">
+                                <div class="log-title">Exported audit report Q4 2025</div>
+                                <div class="log-meta">M. Johnson • Reports • 2 hrs ago</div>
+                            </div>
+                            <span class="badge-pill bg-gray-light">Info</span>
+                        </div>
+                        <div class="log-item">
+                            <div class="log-dot bg-red-light"></div>
+                            <div class="log-content">
+                                <div class="log-title">User account deactivated</div>
+                                <div class="log-meta">Y. Wright • Users • 3 hrs ago</div>
+                            </div>
+                            <span class="badge-pill bg-red-light text-red">Critical</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- New Registrations -->
+                <div class="section-card" style="margin-bottom: 0;">
+                    <div class="section-header" style="margin-bottom: 16px;">
+                        <div class="section-title">New Registrations</div>
+                        <a href="#" style="font-size: 11px; font-weight: 700; color: #2563EB; text-decoration: none;">View →</a>
+                    </div>
+                    <div class="list-container">
+                        <div class="reg-item">
+                            <div class="reg-avatar bg-indigo-light" style="color: #4F46E5;">RK</div>
+                            <div>
+                                <div style="font-size: 13px; font-weight: 600; color: #1E293B;">Rachel Kim</div>
+                                <div style="font-size: 11px; color: #94A3B8;">Employee • Marketing</div>
+                                <div style="font-size: 10px; color: #CBD5E1;">Today, 10:42 AM</div>
+                            </div>
+                        </div>
+                        <div class="reg-item">
+                            <div class="reg-avatar bg-purple-light" style="color: #8B5CF6;">OH</div>
+                            <div>
+                                <div style="font-size: 13px; font-weight: 600; color: #1E293B;">Omar Hassan</div>
+                                <div style="font-size: 11px; color: #94A3B8;">Employee • Engineering</div>
+                                <div style="font-size: 10px; color: #CBD5E1;">Today, 9:15 AM</div>
+                            </div>
+                        </div>
+                        <div class="reg-item">
+                            <div class="reg-avatar bg-blue-light" style="color: #2563EB;">PS</div>
+                            <div>
+                                <div style="font-size: 13px; font-weight: 600; color: #1E293B;">Priya Sharma</div>
+                                <div style="font-size: 11px; color: #94A3B8;">Manager • Operations</div>
+                                <div style="font-size: 10px; color: #CBD5E1;">Yesterday</div>
+                            </div>
+                        </div>
+                        <div class="reg-item">
+                            <div class="reg-avatar bg-indigo-light" style="color: #4F46E5;">CM</div>
+                            <div>
+                                <div style="font-size: 13px; font-weight: 600; color: #1E293B;">Carlos Mendez</div>
+                                <div style="font-size: 11px; color: #94A3B8;">Employee • Finance</div>
+                                <div style="font-size: 10px; color: #CBD5E1;">Jan 9, 2026</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Events -->
+                <div class="section-card" style="margin-bottom: 0;">
+                    <div class="section-header" style="margin-bottom: 16px;">
+                        <div class="section-title">Security Events</div>
+                        <div style="background: #FEF2F2; color: #EF4444; width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><i data-lucide="shield-alert" style="width: 14px; height: 14px;"></i></div>
+                    </div>
+                    <div class="list-container">
+                        <div class="security-card" style="border-color: #FCD34D;">
+                            <div style="display: flex; gap: 8px;">
+                                <i data-lucide="alert-triangle" style="width: 14px; height: 14px; color: #F59E0B; margin-top: 2px;"></i>
+                                <div>
+                                    <div style="font-size: 12px; font-weight: 600; color: #1E293B; margin-bottom: 4px;">5 failed login attempts detected — A. Patel</div>
+                                    <div style="display: flex; align-items: center; gap: 6px;"><span style="font-size: 9px; font-weight: 800; color: #F59E0B;">WARNING</span> <span style="font-size: 10px; color: #94A3B8;">15 min ago</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="security-card" style="border-color: #E2E8F0;">
+                            <div style="display: flex; gap: 8px;">
+                                <i data-lucide="info" style="width: 14px; height: 14px; color: #3B82F6; margin-top: 2px;"></i>
+                                <div>
+                                    <div style="font-size: 12px; font-weight: 600; color: #1E293B; margin-bottom: 4px;">New admin session started from 192.168.1.44</div>
+                                    <div style="display: flex; align-items: center; gap: 6px;"><span style="font-size: 9px; font-weight: 800; color: #3B82F6;">INFO</span> <span style="font-size: 10px; color: #94A3B8;">1 hr ago</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="security-card" style="border-color: #FCA5A5;">
+                            <div style="display: flex; gap: 8px;">
+                                <i data-lucide="alert-octagon" style="width: 14px; height: 14px; color: #EF4444; margin-top: 2px;"></i>
+                                <div>
+                                    <div style="font-size: 12px; font-weight: 600; color: #1E293B; margin-bottom: 4px;">Account suspended — T. Wright (policy breach)</div>
+                                    <div style="display: flex; align-items: center; gap: 6px;"><span style="font-size: 9px; font-weight: 800; color: #EF4444;">CRITICAL</span> <span style="font-size: 10px; color: #94A3B8;">3 hrs ago</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="security-card" style="border-color: #E2E8F0;">
+                            <div style="display: flex; gap: 8px;">
+                                <i data-lucide="key" style="width: 14px; height: 14px; color: #64748B; margin-top: 2px;"></i>
+                                <div>
+                                    <div style="font-size: 12px; font-weight: 600; color: #1E293B; margin-bottom: 4px;">Password reset requested — M. Johnson</div>
+                                    <div style="display: flex; align-items: center; gap: 6px;"><span style="font-size: 9px; font-weight: 800; color: #64748B;">INFO</span> <span style="font-size: 10px; color: #94A3B8;">1 day ago</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Tasks -->
+                <div class="section-card" style="margin-bottom: 0;">
+                    <div class="section-header" style="margin-bottom: 16px;">
+                        <div class="section-title">Admin Tasks</div>
+                        <a href="#" style="font-size: 11px; font-weight: 700; color: #2563EB; text-decoration: none;">View →</a>
+                    </div>
+                    <div class="list-container">
+                        <div class="task-card">
+                            <div style="width: 20px; height: 20px; border-radius: 4px; border: 2px solid #CBD5E1; flex-shrink: 0; margin-top: 2px;"></div>
+                            <div>
+                                <div style="font-size: 12px; font-weight: 600; color: #1E293B; margin-bottom: 6px;">Review pending role-change request for 4 users</div>
+                                <span class="badge-pill bg-red-light text-red">High</span>
+                            </div>
+                        </div>
+                        <div class="task-card">
+                            <div style="width: 20px; height: 20px; border-radius: 4px; border: 2px solid #CBD5E1; flex-shrink: 0; margin-top: 2px;"></div>
+                            <div>
+                                <div style="font-size: 12px; font-weight: 600; color: #1E293B; margin-bottom: 6px;">Approve system configuration changes (v2.4.1)</div>
+                                <span class="badge-pill bg-red-light text-red">High</span>
+                            </div>
+                        </div>
+                        <div class="task-card">
+                            <div style="width: 20px; height: 20px; border-radius: 4px; border: 2px solid #CBD5E1; flex-shrink: 0; margin-top: 2px;"></div>
+                            <div>
+                                <div style="font-size: 12px; font-weight: 600; color: #1E293B; margin-bottom: 6px;">Respond to compliance audit export request</div>
+                                <span class="badge-pill bg-orange-light text-orange">Medium</span>
+                            </div>
+                        </div>
+                        <div class="task-card">
+                            <div style="width: 20px; height: 20px; border-radius: 4px; border: 2px solid #CBD5E1; flex-shrink: 0; margin-top: 2px;"></div>
+                            <div>
+                                <div style="font-size: 12px; font-weight: 600; color: #1E293B; margin-bottom: 6px;">Archive 12 resolved decisions from Q1 2025</div>
+                                <span class="badge-pill bg-gray-light">Low</span>
+                            </div>
+                        </div>
+                        <div class="task-card">
+                            <div style="width: 20px; height: 20px; border-radius: 4px; border: 2px solid #CBD5E1; flex-shrink: 0; margin-top: 2px;"></div>
+                            <div>
+                                <div style="font-size: 12px; font-weight: 600; color: #1E293B; margin-bottom: 6px;">Review and publish knowledge base updates</div>
+                                <span class="badge-pill bg-orange-light text-orange">Medium</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Organization Decision Table -->
+            <div class="section-card" style="margin-bottom: 32px;">
+                <div class="section-header">
+                    <div>
+                        <div class="section-title">Organization Decision Table</div>
+                        <div class="section-subtitle">All decisions across the organization</div>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <button style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid #E2E8F0; border-radius: 8px; background: white; font-size: 12px; font-weight: 600; color: #475569; cursor: pointer;">
+                            <i data-lucide="filter" style="width: 14px; height: 14px;"></i> Filter
+                        </button>
+                        <button style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid #E2E8F0; border-radius: 8px; background: white; font-size: 12px; font-weight: 600; color: #475569; cursor: pointer;">
+                            <i data-lucide="download" style="width: 14px; height: 14px;"></i> Export
+                        </button>
+                        <a href="#" style="font-size: 12px; font-weight: 700; color: #2563EB; text-decoration: none; display: flex; align-items: center; margin-left: 8px;">View All <i data-lucide="chevron-right" style="width: 14px; height: 14px;"></i></a>
+                    </div>
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table class="decision-table">
+                        <thead>
+                            <tr>
+                                <th>Decision</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                                <th>Approver</th>
+                                <th>Created Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Row 1 -->
+                            <tr>
+                                <td>
+                                    <div style="font-size: 13px; font-weight: 600; color: #1E293B; margin-bottom: 2px;">Cloud Infrastructure Migration Strategy</div>
+                                    <div style="font-size: 11px; color: #94A3B8; font-family: monospace;">DEC-1024</div>
+                                </td>
+                                <td><span style="font-size: 11px; font-weight: 600; color: #2563EB; background: #EFF6FF; padding: 4px 10px; border-radius: 12px;">Technology</span></td>
+                                <td><span style="font-size: 11px; font-weight: 600; color: #F59E0B; background: #FFFBEB; padding: 4px 10px; border-radius: 12px;">Pending</span></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="width: 24px; height: 24px; border-radius: 50%; background: #2563EB; color: white; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;">DA</div>
+                                        <span style="font-size: 12px; color: #334155;">Dr. A. Chen</span>
+                                    </div>
+                                </td>
+                                <td><span style="font-size: 12px; color: #64748B;">Jan 15, 2026</span></td>
+                                <td>
+                                    <div style="display: flex; gap: 4px;">
+                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="eye" style="width: 14px; height: 14px;"></i></button>
+                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="edit-2" style="width: 14px; height: 14px;"></i></button>
+                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="more-horizontal" style="width: 14px; height: 14px;"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Row 2 -->
+                            <tr>
+                                <td>
+                                    <div style="font-size: 13px; font-weight: 600; color: #1E293B; margin-bottom: 2px;">Remote Work Policy Revision Q1 2026</div>
+                                    <div style="font-size: 11px; color: #94A3B8; font-family: monospace;">DEC-1033</div>
+                                </td>
+                                <td><span style="font-size: 11px; font-weight: 600; color: #2563EB; background: #EFF6FF; padding: 4px 10px; border-radius: 12px;">HR Policy</span></td>
+                                <td><span style="font-size: 11px; font-weight: 600; color: #8B5CF6; background: #F5F3FF; padding: 4px 10px; border-radius: 12px;">Review</span></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="width: 24px; height: 24px; border-radius: 50%; background: #8B5CF6; color: white; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;">MJ</div>
+                                        <span style="font-size: 12px; color: #334155;">M. Johnson</span>
+                                    </div>
+                                </td>
+                                <td><span style="font-size: 12px; color: #64748B;">Jan 18, 2026</span></td>
+                                <td>
+                                    <div style="display: flex; gap: 4px;">
+                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="eye" style="width: 14px; height: 14px;"></i></button>
+                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="edit-2" style="width: 14px; height: 14px;"></i></button>
+                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="more-horizontal" style="width: 14px; height: 14px;"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Row 3 -->
+                            <tr>
+                                <td>
+                                    <div style="font-size: 13px; font-weight: 600; color: #1E293B; margin-bottom: 2px;">Q1 Budget Allocation — Engineering</div>
+                                    <div style="font-size: 11px; color: #94A3B8; font-family: monospace;">DEC-1102</div>
+                                </td>
+                                <td><span style="font-size: 11px; font-weight: 600; color: #4F46E5; background: #EEF2FF; padding: 4px 10px; border-radius: 12px;">Finance</span></td>
+                                <td><span style="font-size: 11px; font-weight: 600; color: #10B981; background: #ECFDF5; padding: 4px 10px; border-radius: 12px;">Approved</span></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="width: 24px; height: 24px; border-radius: 50%; background: #4F46E5; color: white; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;">SC</div>
+                                        <span style="font-size: 12px; color: #334155;">S. Chen</span>
+                                    </div>
+                                </td>
+                                <td><span style="font-size: 12px; color: #64748B;">Jan 17, 2026</span></td>
+                                <td>
+                                    <div style="display: flex; gap: 4px;">
+                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="eye" style="width: 14px; height: 14px;"></i></button>
+                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="edit-2" style="width: 14px; height: 14px;"></i></button>
+                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="more-horizontal" style="width: 14px; height: 14px;"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Row 4 -->
+                            <tr>
+                                <td>
+                                    <div style="font-size: 13px; font-weight: 600; color: #1E293B; margin-bottom: 2px;">New Vendor Onboarding Process</div>
+                                    <div style="font-size: 11px; color: #94A3B8; font-family: monospace;">DEC-2014</div>
+                                </td>
+                                <td><span style="font-size: 11px; font-weight: 600; color: #2563EB; background: #EFF6FF; padding: 4px 10px; border-radius: 12px;">Procurement</span></td>
+                                <td><span style="font-size: 11px; font-weight: 600; color: #64748B; background: #F1F5F9; padding: 4px 10px; border-radius: 12px;">Draft</span></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="width: 24px; height: 24px; border-radius: 50%; background: #64748B; color: white; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;">LP</div>
+                                        <span style="font-size: 12px; color: #334155;">L. Park</span>
+                                    </div>
+                                </td>
+                                <td><span style="font-size: 12px; color: #64748B;">Jan 25, 2026</span></td>
+                                <td>
+                                    <div style="display: flex; gap: 4px;">
+                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="eye" style="width: 14px; height: 14px;"></i></button>
+                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="edit-2" style="width: 14px; height: 14px;"></i></button>
+                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="more-horizontal" style="width: 14px; height: 14px;"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Row 5 -->
+                            <tr>
+                                <td>
+                                    <div style="font-size: 13px; font-weight: 600; color: #1E293B; margin-bottom: 2px;">Security Compliance Framework Update</div>
+                                    <div style="font-size: 11px; color: #94A3B8; font-family: monospace;">DEC-3135</div>
+                                </td>
+                                <td><span style="font-size: 11px; font-weight: 600; color: #2563EB; background: #EFF6FF; padding: 4px 10px; border-radius: 12px;">Security</span></td>
+                                <td><span style="font-size: 11px; font-weight: 600; color: #F59E0B; background: #FFFBEB; padding: 4px 10px; border-radius: 12px;">Pending</span></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="width: 24px; height: 24px; border-radius: 50%; background: #2563EB; color: white; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;">ML</div>
+                                        <span style="font-size: 12px; color: #334155;">Dr. M. Lee</span>
+                                    </div>
+                                </td>
+                                <td><span style="font-size: 12px; color: #64748B;">Jan 28, 2026</span></td>
+                                <td>
+                                    <div style="display: flex; gap: 4px;">
+                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="eye" style="width: 14px; height: 14px;"></i></button>
+                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="edit-2" style="width: 14px; height: 14px;"></i></button>
+                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="more-horizontal" style="width: 14px; height: 14px;"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="section-title" style="margin-bottom: 16px;">Quick Actions</div>
+            <div class="qa-grid">
+                <div class="qa-card">
+                    <div class="qa-icon bg-blue-light"><i data-lucide="user-plus" style="width: 20px; height: 20px;"></i></div>
+                    <div class="qa-title">Add User</div>
+                </div>
+                <div class="qa-card" onclick="window.location.href=this.dataset.url;" data-url="{{ url_for('roles') }}">
+                    <div class="qa-icon bg-purple-light"><i data-lucide="shield" style="width: 20px; height: 20px;"></i></div>
+                    <div class="qa-title">Manage Roles</div>
+                </div>
+                <div class="qa-card" onclick="window.location.href=this.dataset.url;" data-url="{{ url_for('teams') }}">
+                    <div class="qa-icon bg-teal-light"><i data-lucide="users" style="width: 20px; height: 20px;"></i></div>
+                    <div class="qa-title">Manage Teams</div>
+                </div>
+                <div class="qa-card" onclick="window.location.href=this.dataset.url;" data-url="{{ url_for('audit') }}">
+                    <div class="qa-icon bg-pink-light"><i data-lucide="clipboard-list" style="width: 20px; height: 20px;"></i></div>
+                    <div class="qa-title">View Audit Logs</div>
+                </div>
+                <div class="qa-card" onclick="window.location.href=this.dataset.url;" data-url="{{ url_for('reports') }}">
+                    <div class="qa-icon bg-indigo-light"><i data-lucide="bar-chart-2" style="width: 20px; height: 20px;"></i></div>
+                    <div class="qa-title">Open Reports</div>
+                </div>
+                <div class="qa-card">
+                    <div class="qa-icon" style="background: #F1F5F9; color: #475569;"><i data-lucide="settings" style="width: 20px; height: 20px;"></i></div>
+                    <div class="qa-title">System Settings</div>
+                </div>
+            </div>
+
         </div>
-        {% endif %}
-    </div>
-
-    <br>
-
-    <div class="card shadow">
-        <div class="card-header bg-dark text-white">
-            User Information
-        </div>
-
-        <div class="card-body">
-
-            <table class="table table-bordered">
-
-                <tr>
-                    <th>Name</th>
-                    <td>{{ dashboard.user }}</td>
-                </tr>
-
-                <tr>
-                    <th>Role</th>
-                    <td>{{ dashboard.role }}</td>
-                </tr>
-
-                <tr>
-                    <th>Team</th>
-                    <td>{{ dashboard.team }}</td>
-                </tr>
-
-            </table>
-
-        </div>
-    </div>
-
-    <br>
-
-    <div class="card shadow">
-
-        <div class="card-header bg-primary text-white">
-            Recent Decisions
-        </div>
-
-        <div class="card-body">
-
-            <table class="table table-striped">
-
-                <thead>
-
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Status</th>
-                </tr>
-
-                </thead>
-
-                <tbody>
-
-                {% for decision in dashboard.recent_decisions %}
-
-                <tr>
-
-                    <td>{{ decision.id }}</td>
-                    <td>{{ decision.title }}</td>
-                    <td>{{ decision.status }}</td>
-
-                </tr>
-
-                {% endfor %}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </div>
-
-    <br>
-
-    <div class="card shadow">
-
-        <div class="card-header bg-success text-white">
-            Recent Reviews
-        </div>
-
-        <div class="card-body">
-
-            <table class="table table-striped">
-
-                <thead>
-
-                <tr>
-                    <th>ID</th>
-                    <th>Decision</th>
-                    <th>Status</th>
-                    <th>Comments</th>
-                </tr>
-
-                </thead>
-
-                <tbody>
-
-                {% for review in dashboard.recent_reviews %}
-
-                <tr>
-
-                    <td>{{ review.id }}</td>
-                    <td>{{ review.decision_id }}</td>
-                    <td>{{ review.status }}</td>
-                    <td>{{ review.comments }}</td>
-
-                </tr>
-
-                {% endfor %}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </div>
-
-    <br>
-
-    <div class="card shadow">
-
-        <div class="card-header bg-secondary text-white">
-            Recent Replays
-        </div>
-
-        <div class="card-body">
-
-            <table class="table table-striped">
-
-                <thead>
-
-                <tr>
-
-                    <th>ID</th>
-                    <th>Decision</th>
-                    <th>Action</th>
-
-                </tr>
-
-                </thead>
-
-                <tbody>
-
-                {% if dashboard.recent_replays %}
-
-                    {% for replay in dashboard.recent_replays %}
-
-                    <tr>
-
-                        <td>{{ replay.id }}</td>
-                        <td>{{ replay.decision_id }}</td>
-                        <td>{{ replay.action }}</td>
-
-                    </tr>
-
-                    {% endfor %}
-
-                {% else %}
-
-                    <tr>
-
-                        <td colspan="3" class="text-center">
-                            No Replays Available
-                        </td>
-
-                    </tr>
-
-                {% endif %}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </div>
-
-</div>
-
-{% endblock %}
+    </main>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

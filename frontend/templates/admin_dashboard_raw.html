@@ -1,0 +1,441 @@
+export function DashboardScreen() {
+  // ── Data ──────────────────────────────────────────────────────
+  const decisionTrendData = [
+    { m: "Aug", submitted: 28, approved: 19, rejected: 4 },
+    { m: "Sep", submitted: 34, approved: 24, rejected: 6 },
+    { m: "Oct", submitted: 29, approved: 21, rejected: 3 },
+    { m: "Nov", submitted: 42, approved: 31, rejected: 7 },
+    { m: "Dec", submitted: 38, approved: 27, rejected: 5 },
+    { m: "Jan", submitted: 51, approved: 38, rejected: 8 },
+  ];
+
+  const deptData = [
+    { dept: "Technology", decisions: 58, approved: 42 },
+    { dept: "Finance",    decisions: 44, approved: 35 },
+    { dept: "HR Policy",  decisions: 37, approved: 29 },
+    { dept: "Security",   decisions: 31, approved: 22 },
+    { dept: "Procurement",decisions: 24, approved: 18 },
+  ];
+
+  const userGrowth = [
+    { m: "Aug", users: 84 }, { m: "Sep", users: 91 }, { m: "Oct", users: 98 },
+    { m: "Nov", users: 107 }, { m: "Dec", users: 118 }, { m: "Jan", users: 132 },
+  ];
+
+  const systemUsage = [
+    { name: "Decisions",    value: 38, color: C.blue },
+    { name: "Reviews",      value: 26, color: C.purple },
+    { name: "Discussions",  value: 20, color: C.teal },
+    { name: "Reports",      value: 16, color: C.amber },
+  ];
+
+  const approvalFlow = [
+    { stage: "Submitted",  count: 213, pct: 100, color: C.g400 },
+    { stage: "In Review",  count: 148, pct: 69,  color: C.blue },
+    { stage: "Approved",   count: 185, pct: 87,  color: C.green },
+    { stage: "Rejected",   count: 28,  pct: 13,  color: C.red },
+    { stage: "Archived",   count: 48,  pct: 23,  color: C.g300 },
+  ];
+
+  const orgDecisions = [
+    { id: "DEC-3150", title: "Cloud Infrastructure Migration Strategy", dept: "Technology", status: "Pending",  approver: "Dr. A. Rivera", created: "Jan 10, 2026" },
+    { id: "DEC-3147", title: "Remote Work Policy Revision Q1 2026",     dept: "HR Policy",  status: "Review",   approver: "M. Johnson",    created: "Jan 9, 2026"  },
+    { id: "DEC-3143", title: "Q1 Budget Allocation — Engineering",       dept: "Finance",    status: "Approved", approver: "S. Chen",        created: "Jan 7, 2026"  },
+    { id: "DEC-3139", title: "New Vendor Onboarding Process",            dept: "Procurement",status: "Draft",    approver: "L. Park",        created: "Jan 6, 2026"  },
+    { id: "DEC-3135", title: "Security Compliance Framework Update",     dept: "Security",   status: "Pending",  approver: "Dr. M. Lee",     created: "Jan 5, 2026"  },
+  ];
+
+  const auditLogs = [
+    { user: "S. Chen",   action: "Approved decision DEC-3143",            module: "Decisions", time: "5 min ago",  severity: "Info"    },
+    { user: "A. Patel",  action: "Failed login attempt (3rd try)",         module: "Auth",      time: "18 min ago", severity: "Warning" },
+    { user: "J. Doe",    action: "Submitted DEC-3150 for review",          module: "Decisions", time: "32 min ago", severity: "Info"    },
+    { user: "Admin",     action: "Role permissions updated — Manager",     module: "Roles",     time: "1 hr ago",   severity: "Warning" },
+    { user: "M. Johnson",action: "Exported audit report Q4 2025",          module: "Reports",   time: "2 hrs ago",  severity: "Info"    },
+    { user: "T. Wright", action: "User account deactivated",               module: "Users",     time: "3 hrs ago",  severity: "Critical"},
+  ];
+
+  const newUsers = [
+    { name: "Rachel Kim",    role: "Reviewer",  dept: "Product",    joined: "Today, 9:12 AM",  avatar: "RK" },
+    { name: "Omar Hassan",   role: "Employee",  dept: "Engineering",joined: "Today, 8:40 AM",  avatar: "OH" },
+    { name: "Priya Sharma",  role: "Manager",   dept: "Operations", joined: "Yesterday",        avatar: "PS" },
+    { name: "Carlos Mendez", role: "Employee",  dept: "Finance",    joined: "Jan 9, 2026",      avatar: "CM" },
+  ];
+
+  const securityEvents = [
+    { msg: "3 failed login attempts detected — A. Patel", time: "18 min ago", level: "Warning", icon: AlertTriangle, color: C.amber },
+    { msg: "New admin session started from 192.168.1.44", time: "1 hr ago",   level: "Info",    icon: Lock,          color: C.blue  },
+    { msg: "Account suspended — T. Wright (policy breach)",time: "3 hrs ago",  level: "Critical",icon: Shield,        color: C.red   },
+    { msg: "Password reset requested — M. Johnson",        time: "5 hrs ago",  level: "Info",    icon: RefreshCw,     color: C.g500  },
+  ];
+
+  const adminTasks = [
+    { title: "Review pending role-change request for 4 users",  priority: "High",   icon: UserCheck,     color: C.amber  },
+    { title: "Approve system configuration changes (v2.4.1)",   priority: "High",   icon: Settings,      color: C.red    },
+    { title: "Respond to compliance audit report request",      priority: "Medium", icon: FileCheck,     color: C.purple },
+    { title: "Archive 12 resolved decisions from Q4 2025",      priority: "Low",    icon: Archive,       color: C.g500   },
+    { title: "Review and publish knowledge base updates",        priority: "Medium", icon: BookOpen,      color: C.teal   },
+  ];
+
+  const sysHealth = [
+    { label: "API Response",  val: "98.7%", color: C.green  },
+    { label: "DB Uptime",     val: "99.9%", color: C.green  },
+    { label: "Queue Latency", val: "142ms", color: C.amber  },
+    { label: "Error Rate",    val: "0.3%",  color: C.green  },
+  ];
+
+  const priorityCol = (p: string) => p === "High" ? C.red : p === "Medium" ? C.amber : C.g500;
+  const priorityBg  = (p: string) => p === "High" ? C.redL : p === "Medium" ? C.amberL : C.g100;
+  const severityCol = (s: string) => s === "Critical" ? C.red : s === "Warning" ? C.amber : C.g500;
+  const severityBg  = (s: string) => s === "Critical" ? C.redL : s === "Warning" ? C.amberL : C.g100;
+
+  return (
+    <AdminAppLayout active="dashboard" title="Administrator Dashboard" breadcrumb={["Home", "Administrator Dashboard"]}>
+
+      {/* Role identity accent — Indigo: organization-wide admin view */}
+      <div style="display: flex; align-items: center; gap: 12; background: white; border: #F1F5F9; border-radius: 12px; padding: 12px 18px; margin-bottom: 18; box-shadow: 0 1px 4px rgba(99;">
+        <div style="width: 4px; height: 36px; background: `linear-gradient(180deg; border-radius: 2px; flex-shrink: 0;" />
+        <div>
+          <div style="font-size: 13px; font-weight: 700; color: #0F172A;">Administrator Dashboard</div>
+          <div style="font-size: 11px; color: C.g400; margin-top: 1;">Organization-wide administration — users, decisions, audit logs and system monitoring.</div>
+        </div>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 6; background: C.indigoL; border: `1px solid ${C.indigo}30`; border-radius: 8px; padding: 5px 12px;">
+          <div style="width: 7px; height: 7px; border-radius: 50%; background: C.indigo;" />
+          <span style="font-size: 11px; font-weight: 700; color: C.indigo;">System Administrator</span>
+        </div>
+      </div>
+
+      {/* ── 6 Summary Cards ──────────────────────────────────── */}
+      <div style="display: grid; grid-template-columns: repeat(6; gap: 14; margin-bottom: 20;">
+        {([
+          [Users,        "Total Users",       "132", "+14 this month", C.blue,   C.blueL  ],
+          [FileText,     "Total Decisions",   "213", "Org-wide",       C.indigo, C.indigoL],
+          [CheckSquare,  "Pending Approvals", "18",  "Needs action",   C.amber,  C.amberL ],
+          [Activity,     "Active Sessions",   "47",  "Right now",      C.green,  C.greenL ],
+          [Database,     "Audit Logs",        "1.2k","Last 30 days",   C.purple, C.purpleL],
+          [Zap,          "System Health",     "99%", "All systems up", C.teal,   C.tealL  ],
+        ] as const).map(([Icon, label, val, desc, col, bg]: any) => (
+          <div key={label} style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 6px rgba(0; border: #F1F5F9; cursor: pointer;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12;">
+              <div style="width: 36px; height: 36px; border-radius: 10px; background: bg; display: flex; align-items: center; justify-content: center;"><Icon size={18} color={col} /></div>
+              <TrendingUp size={13} color={C.g300} />
+            </div>
+            <div style="font-size: 22px; font-weight: 900; color: #0F172A; letter-spacing: -0.03em; margin-bottom: 2;">{val}</div>
+            <div style="font-size: 12px; font-weight: 700; color: C.g700; margin-bottom: 1;">{label}</div>
+            <div style="font-size: 10px; color: C.g400;">{desc}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Organization Analytics ───────────────────────────── */}
+      <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 1px 6px rgba(0; border: #F1F5F9; margin-bottom: 18;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18;">
+          <div>
+            <div style="font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em;">Organization Analytics</div>
+            <div style="font-size: 12px; color: C.g400; margin-top: 2;">Decision trends, approval flow and platform usage — last 6 months</div>
+          </div>
+          <div style="display: flex; gap: 6;">
+            {["6M", "1Y", "All"].map((p, i) => (
+              <span key={p} style="font-size: 11px; font-weight: i === 0 ? 700 : 400; color: #64748B; background: #2563EB; border: #2563EB; padding: 4px 10px; border-radius: 6px; cursor: pointer;">{p}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* Row 1: Decision Trends (large) + Approval Flow */}
+        <div style="display: grid; grid-template-columns: 3fr 2fr; gap: 16; margin-bottom: 16;">
+          {/* Decision Trends */}
+          <div style="background: C.g50; border-radius: 12px; padding: 16px; border: #F1F5F9;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14;">
+              <div style="font-size: 13px; font-weight: 700; color: C.g800;">Decision Trends</div>
+              <div style="display: flex; gap: 14;">
+                {[["Submitted", C.indigo], ["Approved", C.green], ["Rejected", C.red]].map(([l, c]) => (
+                  <div key={l} style="display: flex; align-items: center; gap: 4;"><div style="width: 8px; height: 8px; border-radius: 2px; background: c;" /><span style="font-size: 10px; color: #64748B;">{l}</span></div>
+                ))}
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={130}>
+              <AreaChart data={decisionTrendData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="adminGrad1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={C.indigo} stopOpacity={0.18} />
+                    <stop offset="95%" stopColor={C.indigo} stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="adminGrad2" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={C.green} stopOpacity={0.15} />
+                    <stop offset="95%" stopColor={C.green} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke={C.g100} />
+                <XAxis dataKey="m" tick={{ fontSize: 10, fill: C.g400 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: C.g400 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: `1px solid ${C.g200}` }} />
+                <Area type="monotone" dataKey="submitted" stroke={C.indigo} strokeWidth={2} fill="url(#adminGrad1)" name="Submitted" />
+                <Area type="monotone" dataKey="approved"  stroke={C.green} strokeWidth={2} fill="url(#adminGrad2)" name="Approved" />
+                <Line type="monotone" dataKey="rejected"  stroke={C.red} strokeWidth={1.5} dot={false} name="Rejected" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Approval Flow Funnel */}
+          <div style="background: C.g50; border-radius: 12px; padding: 16px; border: #F1F5F9;">
+            <div style="font-size: 13px; font-weight: 700; color: C.g800; margin-bottom: 14;">Approval Flow</div>
+            <div style="display: flex; flex-direction: column; gap: 10;">
+              {approvalFlow.map((s) => (
+                <div key={s.stage}>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 5;">
+                    <span style="font-size: 12px; color: C.g600;">{s.stage}</span>
+                    <div style="display: flex; gap: 8; align-items: center;">
+                      <span style="font-size: 11px; color: C.g400;">{s.pct}%</span>
+                      <span style="font-size: 12px; font-weight: 700; color: C.g800;">{s.count}</span>
+                    </div>
+                  </div>
+                  <div style="height: 7px; background: #E2E8F0; border-radius: 4px; overflow: hidden;">
+                    <div style="width: `${s.pct}%`; height: 100%; background: s.color; border-radius: 4px;" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Row 2: Dept Comparison + User Growth + System Usage */}
+        <div style="display: grid; grid-template-columns: 2fr 2fr 1fr; gap: 16;">
+          {/* Department Comparison */}
+          <div style="background: C.g50; border-radius: 12px; padding: 16px; border: #F1F5F9;">
+            <div style="font-size: 13px; font-weight: 700; color: C.g800; margin-bottom: 14;">Department Comparison</div>
+            <ResponsiveContainer width="100%" height={120}>
+              <BarChart data={deptData} margin={{ top: 0, right: 4, left: -24, bottom: 0 }} barGap={2}>
+                <CartesianGrid strokeDasharray="3 3" stroke={C.g100} />
+                <XAxis dataKey="dept" tick={{ fontSize: 9, fill: C.g400 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 9, fill: C.g400 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8, border: `1px solid ${C.g200}` }} />
+                <Bar dataKey="decisions" fill={C.indigo} name="Total" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="approved"  fill={C.green} name="Approved" radius={[3, 3, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* User Growth */}
+          <div style="background: C.g50; border-radius: 12px; padding: 16px; border: #F1F5F9;">
+            <div style="font-size: 13px; font-weight: 700; color: C.g800; margin-bottom: 14;">Monthly Activity</div>
+            <ResponsiveContainer width="100%" height={120}>
+              <LineChart data={userGrowth} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={C.g100} />
+                <XAxis dataKey="m" tick={{ fontSize: 10, fill: C.g400 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: C.g400 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8, border: `1px solid ${C.g200}` }} />
+                <Line type="monotone" dataKey="users" stroke={C.purple} strokeWidth={2} dot={{ r: 3, fill: C.purple }} name="Users" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* System Usage Donut-style */}
+          <div style="background: C.g50; border-radius: 12px; padding: 16px; border: #F1F5F9;">
+            <div style="font-size: 13px; font-weight: 700; color: C.g800; margin-bottom: 12;">System Usage</div>
+            <div style="display: flex; flex-direction: column; gap: 8;">
+              {systemUsage.map((s) => (
+                <div key={s.name}>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 3;">
+                    <span style="font-size: 10px; color: C.g600;">{s.name}</span>
+                    <span style="font-size: 10px; font-weight: 700; color: C.g800;">{s.value}%</span>
+                  </div>
+                  <div style="height: 5px; background: #E2E8F0; border-radius: 3px;">
+                    <div style="width: `${s.value}%`; height: 100%; background: s.color; border-radius: 3px;" />
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* System health mini row */}
+            <div style="margin-top: 14; padding-top: 12; border-top: #E2E8F0;">
+              <div style="font-size: 11px; font-weight: 700; color: C.g600; margin-bottom: 8;">System Health</div>
+              {sysHealth.map((s) => (
+                <div key={s.label} style="display: flex; justify-content: space-between; margin-bottom: 4;">
+                  <span style="font-size: 10px; color: #64748B;">{s.label}</span>
+                  <span style="font-size: 10px; font-weight: 700; color: s.color;">{s.val}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Middle: Audit Logs | New Users | Security Events | Admin Tasks ── */}
+      <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 16; margin-bottom: 18;">
+
+        {/* Recent Audit Logs */}
+        <div style="background: white; border-radius: 14px; padding: 18px; box-shadow: 0 1px 6px rgba(0; border: #F1F5F9;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14;">
+            <div style="font-size: 14px; font-weight: 800; color: #0F172A;">Recent Audit Logs</div>
+            <span style="font-size: 11px; font-weight: 700; color: #2563EB; cursor: pointer;">View all →</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8;">
+            {auditLogs.map((log, i) => (
+              <div key={i} style="display: flex; gap: 10; align-items: flex-start; padding: 8px 10px; background: C.g50; border-radius: 8px; border: #F1F5F9;">
+                <div style="width: 6px; height: 6px; border-radius: 50%; background: severityCol(log.severity); margin-top: 5; flex-shrink: 0;" />
+                <div style="flex: 1; min-width: 0;">
+                  <div style="font-size: 12px; font-weight: 600; color: C.g800; margin-bottom: 1; white-space: nowrap as const; overflow: hidden; text-overflow: ellipsis;">{log.action}</div>
+                  <div style="display: flex; gap: 8;">
+                    <span style="font-size: 10px; color: #64748B;">{log.user}</span>
+                    <span style="font-size: 10px; color: C.g300;">·</span>
+                    <span style="font-size: 10px; color: C.g400;">{log.module}</span>
+                    <span style="font-size: 10px; color: C.g300;">·</span>
+                    <span style="font-size: 10px; color: C.g400;">{log.time}</span>
+                  </div>
+                </div>
+                <span style="font-size: 9px; font-weight: 700; color: severityCol(log.severity); background: severityBg(log.severity); padding: 2px 6px; border-radius: 8px; flex-shrink: 0;">{log.severity}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* New User Registrations */}
+        <div style="background: white; border-radius: 14px; padding: 18px; box-shadow: 0 1px 6px rgba(0; border: #F1F5F9;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14;">
+            <div style="font-size: 13px; font-weight: 800; color: #0F172A;">New Registrations</div>
+            <span style="font-size: 10px; font-weight: 700; color: #2563EB; cursor: pointer;">View →</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10;">
+            {newUsers.map((u, i) => (
+              <div key={i} style="display: flex; align-items: center; gap: 9;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; flex-shrink: 0;">{u.avatar}</div>
+                <div style="flex: 1; min-width: 0;">
+                  <div style="font-size: 12px; font-weight: 600; color: C.g800;">{u.name}</div>
+                  <div style="font-size: 10px; color: #64748B;">{u.role} · {u.dept}</div>
+                  <div style="font-size: 10px; color: C.g400; margin-top: 1;">{u.joined}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Latest Security Events */}
+        <div style="background: white; border-radius: 14px; padding: 18px; box-shadow: 0 1px 6px rgba(0; border: #F1F5F9;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14;">
+            <div style="font-size: 13px; font-weight: 800; color: #0F172A;">Security Events</div>
+            <div style="width: 22px; height: 22px; background: #EF4444; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><Lock size={11} color={C.red} /></div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10;">
+            {securityEvents.map((ev, i) => {
+              const Icon = ev.icon;
+              return (
+                <div key={i} style="padding: 8px 10px; border-radius: 8px; background: `${ev.color}0d`; border: `1px solid ${ev.color}22`;">
+                  <div style="display: flex; gap: 7; align-items: flex-start;">
+                    <Icon size={13} color={ev.color} style="margin-top: 1; flex-shrink: 0;" />
+                    <div>
+                      <div style="font-size: 11px; font-weight: 600; color: C.g800; line-height: 1.3; margin-bottom: 3;">{ev.msg}</div>
+                      <div style="display: flex; gap: 6;">
+                        <span style="font-size: 9px; font-weight: 700; color: ev.color; text-transform: uppercase as const;">{ev.level}</span>
+                        <span style="font-size: 9px; color: C.g400;">{ev.time}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Pending Admin Tasks */}
+        <div style="background: white; border-radius: 14px; padding: 18px; box-shadow: 0 1px 6px rgba(0; border: #F1F5F9;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14;">
+            <div style="font-size: 13px; font-weight: 800; color: #0F172A;">Admin Tasks</div>
+            <span style="font-size: 10px; font-weight: 700; color: #2563EB; cursor: pointer;">View →</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 9;">
+            {adminTasks.map((task, i) => {
+              const Icon = task.icon;
+              return (
+                <div key={i} style="display: flex; gap: 8; align-items: flex-start; padding: 8px 10px; background: C.g50; border-radius: 8px; border: #F1F5F9;">
+                  <div style="width: 28px; height: 28px; border-radius: 7px; background: `${task.color}18`; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><Icon size={13} color={task.color} /></div>
+                  <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 11px; font-weight: 600; color: C.g800; line-height: 1.35; margin-bottom: 4;">{task.title}</div>
+                    <span style="font-size: 9px; font-weight: 700; color: priorityCol(task.priority); background: priorityBg(task.priority); padding: 1px 6px; border-radius: 8px;">{task.priority}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Organization Decision Table ──────────────────────── */}
+      <div style="background: white; border-radius: 14px; box-shadow: 0 1px 6px rgba(0; border: #F1F5F9; margin-bottom: 18;">
+        <div style="padding: 16px 20px; border-bottom: #F1F5F9; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 14px; font-weight: 800; color: #0F172A;">Organization Decision Table</div>
+            <div style="font-size: 11px; color: C.g400; margin-top: 2;">All decisions across the organization</div>
+          </div>
+          <div style="display: flex; gap: 8;">
+            <div style="display: flex; align-items: center; gap: 6; background: C.g50; border: #E2E8F0; border-radius: 7px; padding: 6px 12px;">
+              <Filter size={12} color={C.g500} /><span style="font-size: 11px; color: C.g600;">Filter</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6; background: C.g50; border: #E2E8F0; border-radius: 7px; padding: 6px 12px; cursor: pointer;">
+              <Download size={12} color={C.g500} /><span style="font-size: 11px; color: C.g600;">Export</span>
+            </div>
+            <button style="font-size: 11px; color: #2563EB; font-weight: 700; background: none; border: none; cursor: pointer;">View All →</button>
+          </div>
+        </div>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background: C.g50;">
+              {["Decision", "Department", "Status", "Approver", "Created Date", "Actions"].map(h => (
+                <th key={h} style="padding: 10px 16px; font-size: 10px; font-weight: 700; color: #64748B; text-align: left as const; text-transform: uppercase as const; letter-spacing: 0.06em; white-space: nowrap as const;">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {orgDecisions.map((dec) => (
+              <tr key={dec.id} style="border-top: #F1F5F9; cursor: pointer;">
+                <td style="padding: 12px 16px;">
+                  <div style="font-size: 13px; font-weight: 600; color: C.g800; margin-bottom: 2;">{dec.title}</div>
+                  <div style="font-size: 10px; color: C.g400; font-family: monospace;">{dec.id}</div>
+                </td>
+                <td style="padding: 12px 16px;">
+                  <span style="font-size: 11px; font-weight: 600; color: #2563EB; background: #2563EB; padding: 3px 8px; border-radius: 12px;">{dec.dept}</span>
+                </td>
+                <td style="padding: 12px 16px;"><SBadge s={dec.status} /></td>
+                <td style="padding: 12px 16px;">
+                  <div style="display: flex; align-items: center; gap: 7;">
+                    <div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: white;">{dec.approver.split(" ").map(n => n[0]).join("")}</div>
+                    <span style="font-size: 12px; color: C.g600;">{dec.approver}</span>
+                  </div>
+                </td>
+                <td style="padding: 12px 16px; font-size: 12px; color: #64748B; white-space: nowrap as const;">{dec.created}</td>
+                <td style="padding: 12px 16px;">
+                  <div style="display: flex; gap: 5;">
+                    <button style="padding: 4px 8px; border: #E2E8F0; border-radius: 6px; background: white; cursor: pointer;"><Eye size={13} color={C.g500} /></button>
+                    <button style="padding: 4px 8px; border: #E2E8F0; border-radius: 6px; background: white; cursor: pointer;"><Edit3 size={13} color={C.g500} /></button>
+                    <button style="padding: 4px 8px; border: #E2E8F0; border-radius: 6px; background: white; cursor: pointer;"><MoreHorizontal size={13} color={C.g500} /></button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* ── Quick Actions (6 buttons) ─────────────────────────── */}
+      <div style="background: white; border-radius: 14px; padding: 18px; box-shadow: 0 1px 6px rgba(0; border: #F1F5F9;">
+        <div style="font-size: 14px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em; margin-bottom: 14;">Quick Actions</div>
+        <div style="display: grid; grid-template-columns: repeat(6; gap: 10;">
+          {([
+            [Users,    "Add User",         C.blue,   C.blueL  ],
+            [Shield,   "Manage Roles",     C.purple, C.purpleL],
+            [GitBranch,"Manage Teams",     C.teal,   C.tealL  ],
+            [Database, "View Audit Logs",  C.red,    C.redL   ],
+            [BarChart2,"Open Reports",     C.indigo, C.indigoL],
+            [Settings, "System Settings",  C.g600,   C.g100   ],
+          ] as const).map(([Icon, label, col, bg]: any) => (
+            <button key={label} style="display: flex; flex-direction: column; align-items: center; gap: 9; padding: 16px 10px; border: #E2E8F0; border-radius: 10px; background: white; cursor: pointer;">
+              <div style="width: 40px; height: 40px; border-radius: 10px; background: bg; display: flex; align-items: center; justify-content: center;"><Icon size={18} color={col} /></div>
+              <span style="font-size: 11px; font-weight: 600; color: C.g700; text-align: center as const; line-height: 1.3;">{label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+    </AdminAppLayout>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SCREEN 3b: EMPLOYEE / REVIEWER DASHBOARD

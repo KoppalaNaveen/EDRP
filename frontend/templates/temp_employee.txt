@@ -1,0 +1,219 @@
+export function EmployeeReviewerDashboardScreen() {
+  const decisions = [
+    { id: "DEC-3142", title: "Cloud Infrastructure Migration Strategy", category: "Technology", updated: "2 hours ago", status: "Pending", reviewer: "Dr. A. Rivera", priority: "High" },
+    { id: "DEC-3138", title: "Remote Work Policy Revision Q1 2026", category: "HR Policy", updated: "5 hours ago", status: "Review", reviewer: "M. Johnson", priority: "Medium" },
+    { id: "DEC-3135", title: "Q1 Budget Allocation — Engineering Team", category: "Finance", updated: "1 day ago", status: "Approved", reviewer: "S. Chen", priority: "High" },
+    { id: "DEC-3129", title: "New Vendor Onboarding Process", category: "Procurement", updated: "2 days ago", status: "Draft", reviewer: "L. Park", priority: "Low" },
+    { id: "DEC-3121", title: "Security Compliance Framework Update", category: "Security", updated: "3 days ago", status: "Approved", reviewer: "T. Wright", priority: "Critical" },
+  ];
+
+  const tasks = [
+    { id: 1, type: "Review Request", title: "Remote Work Policy Revision Q1 2026", deadline: "Today, 5:00 PM", icon: FileCheck, color: C.amber },
+    { id: 2, type: "Document Update", title: "Security Compliance Framework — Attachments needed", deadline: "Tomorrow", icon: Upload, color: C.blue },
+    { id: 3, type: "Approval Pending", title: "Product Roadmap Q1 2026 — Awaiting reviewer feedback", deadline: "Jan 13, 2026", icon: CheckSquare, color: C.purple },
+    { id: 4, type: "Comment Reply", title: "Employee Benefits Package — Respond to discussion", deadline: "Jan 14, 2026", icon: MessageSquare, color: C.indigo },
+    { id: 5, type: "Draft Completion", title: "Complete New Vendor Onboarding decision draft", deadline: "Jan 15, 2026", icon: Edit3, color: C.g500 },
+  ];
+
+  const notifications = [
+    { id: 1, type: "Review Request", msg: "Dr. A. Rivera requested your review on Cloud Infrastructure Migration", time: "5 min ago", icon: Eye, color: C.blue },
+    { id: 2, type: "Mention", msg: "Sarah Chen mentioned you in Q1 Budget Allocation discussion", time: "1 hour ago", icon: Star, color: C.purple },
+    { id: 3, type: "Status Update", msg: "Your decision 'Security Compliance Framework' has been approved", time: "2 hours ago", icon: CheckSquare, color: C.green },
+    { id: 4, type: "Comment", msg: "New comment on Remote Work Policy Revision", time: "3 hours ago", icon: MessageSquare, color: C.indigo },
+    { id: 5, type: "Reminder", msg: "Document upload required for Security Compliance Framework", time: "4 hours ago", icon: Clock, color: C.amber },
+    { id: 6, type: "Approval", msg: "Your decision DEC-3135 moved to approval stage", time: "5 hours ago", icon: ArrowRight, color: C.blue },
+  ];
+
+  const activities = [
+    { id: 1, action: "submitted", title: "Cloud Infrastructure Migration Strategy", user: "You", time: "2 hours ago", icon: Send, color: C.blue },
+    { id: 2, action: "commented on", title: "Remote Work Policy Revision Q1 2026", user: "You", time: "5 hours ago", icon: MessageSquare, color: C.purple },
+    { id: 3, action: "approved", title: "Q1 Budget Allocation — Engineering Team", user: "Sarah Chen", time: "1 day ago", icon: CheckSquare, color: C.green },
+    { id: 4, action: "updated", title: "New Vendor Onboarding Process", user: "You", time: "2 days ago", icon: Edit3, color: C.amber },
+    { id: 5, action: "reviewed", title: "Security Compliance Framework Update", user: "Dr. M. Lee", time: "3 days ago", icon: Eye, color: C.indigo },
+  ];
+
+  return (
+    <AppLayout active="dashboard" title="Employee / Reviewer Dashboard" breadcrumb={["Home", "Employee / Reviewer Dashboard"]}>
+      {/* Role identity accent — Blue: task-focused employee view */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, background: "white", border: `1px solid ${C.g100}`, borderRadius: 12, padding: "12px 18px", marginBottom: 20, boxShadow: "0 1px 4px rgba(37,99,235,0.07)" }}>
+        <div style={{ width: 4, height: 36, background: `linear-gradient(180deg,${C.blue},#3B82F6)`, borderRadius: 2, flexShrink: 0 }} />
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: C.g900 }}>Employee / Reviewer Dashboard</div>
+          <div style={{ fontSize: 11, color: C.g400, marginTop: 1 }}>Your personal workspace — decisions, tasks and reviews assigned to you.</div>
+        </div>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, background: C.blueL, border: `1px solid ${C.blueMid}`, borderRadius: 8, padding: "5px 12px" }}>
+          <div style={{ width: 7, height: 7, borderRadius: "50%", background: C.blue }} />
+          <span style={{ fontSize: 11, fontWeight: 700, color: C.blue }}>Employee · Reviewer</span>
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 18, marginBottom: 24 }}>
+        {[[FileText, "My Decisions", "23", "Total active", C.blue, C.blueL], [Edit3, "Draft Decisions", "5", "In progress", C.amber, C.amberL], [Clock, "Pending Reviews", "8", "Awaiting review", C.purple, C.purpleL], [CheckSquare, "Approved Decisions", "12", "This month", C.green, C.greenL]].map(([Icon, label, val, desc, col, bg]: any) => (
+          <div key={label} style={{ background: "white", borderRadius: 14, padding: 20, boxShadow: "0 2px 10px rgba(0,0,0,0.06)", border: `1px solid ${C.g100}`, cursor: "pointer", transition: "transform 0.2s" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+              <div style={{ width: 48, height: 48, borderRadius: 12, background: bg, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 4px 12px ${col}22` }}><Icon size={24} color={col} /></div>
+              <ArrowRight size={18} color={C.g300} />
+            </div>
+            <div style={{ fontSize: 28, fontWeight: 900, color: C.g900, letterSpacing: "-0.03em", marginBottom: 4 }}>{val}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: C.g700, marginBottom: 2 }}>{label}</div>
+            <div style={{ fontSize: 12, color: C.g400 }}>{desc}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ background: "white", borderRadius: 16, padding: 24, boxShadow: "0 2px 10px rgba(0,0,0,0.06)", border: `1px solid ${C.g100}`, marginBottom: 24 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <div><div style={{ fontSize: 17, fontWeight: 800, color: C.g900, letterSpacing: "-0.01em" }}>My Pending Tasks</div><div style={{ fontSize: 13, color: C.g400, marginTop: 2 }}>Tasks and actions requiring your attention</div></div>
+          <span style={{ fontSize: 13, fontWeight: 700, color: C.blue, cursor: "pointer" }}>View All →</span>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {tasks.map((task) => { const Icon = task.icon; return (
+            <div key={task.id} style={{ border: `1px solid ${C.g200}`, borderRadius: 12, padding: "14px 16px", background: C.g50, cursor: "pointer", transition: "all 0.2s" }}>
+              <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                <div style={{ width: 38, height: 38, borderRadius: 10, background: `${task.color}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Icon size={18} color={task.color} /></div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: task.color, textTransform: "uppercase", letterSpacing: "0.03em", marginBottom: 4 }}>{task.type}</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: C.g800, marginBottom: 6, lineHeight: 1.3 }}>{task.title}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}><Clock size={12} color={C.g400} /><span style={{ fontSize: 12, color: C.g500 }}>{task.deadline}</span></div>
+                </div>
+              </div>
+            </div>
+          );})}
+        </div>
+      </div>
+      <div style={{ background: "white", borderRadius: 16, padding: 24, boxShadow: "0 2px 10px rgba(0,0,0,0.06)", border: `1px solid ${C.g100}`, marginBottom: 24 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <div><div style={{ fontSize: 17, fontWeight: 800, color: C.g900, letterSpacing: "-0.01em" }}>Recent Notifications</div><div style={{ fontSize: 13, color: C.g400, marginTop: 2 }}>Latest updates and alerts</div></div>
+          <div style={{ position: "relative" }}><Bell size={20} color={C.g400} /><div style={{ position: "absolute", top: -4, right: -4, width: 16, height: 16, background: C.red, borderRadius: "50%", border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ color: "white", fontSize: 9, fontWeight: 700 }}>6</span></div></div>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {notifications.map((notif) => { const Icon = notif.icon; return (
+            <div key={notif.id} style={{ padding: "12px 14px", borderRadius: 10, background: C.g50, border: `1px solid ${C.g100}`, cursor: "pointer", transition: "all 0.2s" }}>
+              <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                <div style={{ width: 32, height: 32, borderRadius: "50%", background: `${notif.color}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Icon size={15} color={notif.color} /></div>
+                <div style={{ flex: 1 }}><div style={{ fontSize: 11, fontWeight: 700, color: notif.color, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 3 }}>{notif.type}</div><div style={{ fontSize: 13, color: C.g700, lineHeight: 1.4, marginBottom: 4 }}>{notif.msg}</div><div style={{ fontSize: 11, color: C.g400 }}>{notif.time}</div></div>
+              </div>
+            </div>
+          );})}
+        </div>
+      </div>
+      <div style={{ background: "white", borderRadius: 16, padding: 24, boxShadow: "0 2px 10px rgba(0,0,0,0.06)", border: `1px solid ${C.g100}`, marginBottom: 24 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <div><div style={{ fontSize: 17, fontWeight: 800, color: C.g900, letterSpacing: "-0.01em" }}>Recent Activities</div><div style={{ fontSize: 13, color: C.g400, marginTop: 2 }}>Your activity timeline</div></div>
+          <span style={{ fontSize: 13, fontWeight: 700, color: C.blue, cursor: "pointer" }}>View All →</span>
+        </div>
+        <div style={{ position: "relative", paddingLeft: 40 }}>
+          {activities.map((activity, index) => { const Icon = activity.icon; const isLast = index === activities.length - 1; return (
+            <div key={activity.id} style={{ position: "relative", paddingBottom: isLast ? 0 : 24 }}>
+              {!isLast && <div style={{ position: "absolute", left: -24, top: 40, width: 2, height: "calc(100% - 16px)", background: C.g200 }} />}
+              <div style={{ position: "absolute", left: -32, top: 0, width: 32, height: 32, borderRadius: "50%", background: `${activity.color}18`, border: `2px solid ${activity.color}`, display: "flex", alignItems: "center", justifyContent: "center" }}><Icon size={14} color={activity.color} /></div>
+              <div style={{ background: C.g50, border: `1px solid ${C.g100}`, borderRadius: 10, padding: "12px 16px" }}>
+                <div style={{ fontSize: 14, color: C.g800, marginBottom: 4 }}><span style={{ fontWeight: 700, color: activity.user === "You" ? C.blue : C.g800 }}>{activity.user}</span><span style={{ color: C.g600 }}> {activity.action} </span><span style={{ fontWeight: 600, color: C.g800 }}>{activity.title}</span></div>
+                <div style={{ fontSize: 12, color: C.g400 }}>{activity.time}</div>
+              </div>
+            </div>
+          );})}
+        </div>
+      </div>
+      <div style={{ background: "white", borderRadius: 16, boxShadow: "0 2px 10px rgba(0,0,0,0.06)", border: `1px solid ${C.g100}`, marginBottom: 24 }}>
+        <div style={{ padding: "20px 26px", borderBottom: `1px solid ${C.g100}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div><div style={{ fontSize: 17, fontWeight: 800, color: C.g900, letterSpacing: "-0.01em" }}>Recent Decisions</div><div style={{ fontSize: 13, color: C.g400, marginTop: 2 }}>Your recent decision submissions</div></div>
+          <button style={{ fontSize: 13, color: C.blue, fontWeight: 600, background: "none", border: "none", cursor: "pointer" }}>View All →</button>
+        </div>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead><tr style={{ background: C.g50 }}>{["Decision", "Category", "Reviewer", "Status", "Priority", "Last Updated", "Actions"].map(h => <th key={h} style={{ padding: "13px 26px", fontSize: 11, fontWeight: 700, color: C.g500, textAlign: "left", textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</th>)}</tr></thead>
+            <tbody>{decisions.map((dec) => (
+              <tr key={dec.id} style={{ borderTop: `1px solid ${C.g100}`, transition: "background 0.2s", cursor: "pointer" }}>
+                <td style={{ padding: "16px 26px" }}><div style={{ fontSize: 14, fontWeight: 600, color: C.g800, marginBottom: 3 }}>{dec.title}</div><div style={{ fontSize: 12, color: C.g400, fontFamily: "monospace" }}>{dec.id}</div></td>
+                <td style={{ padding: "16px 26px" }}><span style={{ fontSize: 12, fontWeight: 600, color: C.blue, background: C.blueL, padding: "4px 10px", borderRadius: 16 }}>{dec.category}</span></td>
+                <td style={{ padding: "16px 26px" }}><div style={{ display: "flex", alignItems: "center", gap: 8 }}><div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#2563EB,#7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "white", fontWeight: 700 }}>{dec.reviewer.split(" ").map(n => n[0]).join("")}</div><span style={{ fontSize: 13, color: C.g600 }}>{dec.reviewer}</span></div></td>
+                <td style={{ padding: "16px 26px" }}><SBadge s={dec.status} /></td>
+                <td style={{ padding: "16px 26px" }}><span style={{ fontSize: 12, fontWeight: 600, color: dec.priority === "Critical" ? C.red : dec.priority === "High" ? C.amber : dec.priority === "Medium" ? C.blue : C.g500, background: dec.priority === "Critical" ? C.redL : dec.priority === "High" ? C.amberL : dec.priority === "Medium" ? C.blueL : C.g100, padding: "4px 11px", borderRadius: 20 }}>{dec.priority}</span></td>
+                <td style={{ padding: "16px 26px", fontSize: 13, color: C.g500 }}>{dec.updated}</td>
+                <td style={{ padding: "16px 26px" }}><div style={{ display: "flex", gap: 8 }}><button style={{ padding: "6px 10px", border: `1px solid ${C.g200}`, borderRadius: 7, background: "white", cursor: "pointer" }}><Eye size={15} color={C.g500} /></button><button style={{ padding: "6px 10px", border: `1px solid ${C.g200}`, borderRadius: 7, background: "white", cursor: "pointer" }}><MoreHorizontal size={15} color={C.g500} /></button></div></td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>
+      </div>
+      <div style={{ background: "white", borderRadius: 16, padding: 24, boxShadow: "0 2px 10px rgba(0,0,0,0.06)", border: `1px solid ${C.g100}` }}>
+        <div style={{ fontSize: 17, fontWeight: 800, color: C.g900, letterSpacing: "-0.01em", marginBottom: 18 }}>Quick Actions</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
+          {[[PlusCircle, "Create Decision", C.blue, C.blueL], [Search, "Search Decisions", C.purple, C.purpleL], [Upload, "Upload Document", C.green, C.greenL], [BookOpen, "Knowledge Repository", C.indigo, C.indigoL]].map(([Icon, label, col, bg]: any) => (
+            <button key={label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: "20px 16px", border: `1px solid ${C.g200}`, borderRadius: 12, background: "white", cursor: "pointer", transition: "all 0.2s" }}>
+              <div style={{ width: 48, height: 48, borderRadius: 12, background: bg, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 4px 12px ${col}22` }}><Icon size={22} color={col} /></div>
+              <span style={{ fontSize: 14, fontWeight: 600, color: C.g800, textAlign: "center" }}>{label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </AppLayout>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SCREEN 3c: MANAGER DASHBOARD
+// ══════════════════════════════════════════════════════════════════
+const MGR_NAV_ITEMS = [
+  { id: "dashboard", label: "Dashboard", Icon: LayoutDashboard },
+  { id: "team-decisions", label: "Team Decisions", Icon: FileText },
+  { id: "pending-approvals", label: "Pending Approvals", Icon: CheckSquare, badge: 7 },
+  { id: "discussions", label: "Discussion Module", Icon: MessageSquare },
+  { id: "knowledge", label: "Knowledge Repository", Icon: BookOpen },
+  { id: "reports", label: "Reports", Icon: BarChart2 },
+  { id: "notifications", label: "Notifications", Icon: Bell },
+  { id: "profile", label: "Profile", Icon: Users },
+  { id: "settings", label: "Settings", Icon: Settings },
+];
+
+function ManagerSidebar({ active }: { active: string }) {
+  return (
+    <div style={{ width: 240, height: "100%", background: C.navy, display: "flex", flexDirection: "column", flexShrink: 0 }}>
+      <div style={{ padding: "28px 20px 22px", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ width: 40, height: 40, borderRadius: 10, background: C.teal, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Zap size={21} color="white" />
+          </div>
+          <div>
+            <div style={{ color: "white", fontSize: 15, fontWeight: 800, letterSpacing: "-0.02em" }}>EDRP</div>
+            <div style={{ color: C.g400, fontSize: 11 }}>Decision Platform</div>
+          </div>
+        </div>
+      </div>
+      <nav style={{ flex: 1, padding: "14px 10px", overflow: "hidden" }}>
+        {MGR_NAV_ITEMS.map(({ id, label, Icon, badge }: any) => {
+          const on = active === id;
+          return (
+            <div key={id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 8, marginBottom: 2, background: on ? C.teal : "transparent" }}>
+              <Icon size={16} color={on ? "white" : C.g400} />
+              <span style={{ fontSize: 13, fontWeight: on ? 600 : 400, color: on ? "white" : C.g400, flex: 1 }}>{label}</span>
+              {badge && <span style={{ background: C.red, color: "white", fontSize: 10, fontWeight: 700, padding: "1px 7px", borderRadius: 10 }}>{badge}</span>}
+            </div>
+          );
+        })}
+      </nav>
+      <div style={{ padding: "16px 14px", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(135deg,#2563EB,#7C3AED)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ color: "white", fontSize: 13, fontWeight: 700 }}>MR</span>
+          </div>
+          <div>
+            <div style={{ color: "white", fontSize: 13, fontWeight: 500 }}>M. Rodriguez</div>
+            <div style={{ color: C.g400, fontSize: 11 }}>Manager</div>
+          </div>
+          <LogOut size={15} color={C.g400} style={{ marginLeft: "auto" }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ManagerAppLayout({ active, title, breadcrumb, children }: any) {
+  return (
+    <div style={{ width: FW, height: FH, display: "flex", background: C.g50, fontFamily: "'Inter',-apple-system,sans-serif", overflow: "hidden" }}>
+      <ManagerSidebar active={active} />
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <TopNav title={title} breadcrumb={breadcrumb} />
+        <div style={{ flex: 1, overflowY: "auto", padding: 28 }}>{children}</div>
+      </div>
+    </div>
+  );

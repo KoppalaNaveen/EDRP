@@ -1,0 +1,200 @@
+                </div>
+                <div style={{ background: "white", borderRadius: 16, padding: 24, border: `1px solid ${C.g100}`, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: C.g900, marginBottom: 18 }}>Compliance Summary</div>
+                  {[["Decisions with Full Audit Trail", "100%", C.green], ["Avg. Approval Cycle Time", "4.2 days", C.blue], ["Policy Violations Detected", "0", C.green], ["Data Retention Compliance", "100%", C.green], ["External Audit Readiness", "98.4%", C.blue]].map(([m, v, col]) => (
+                    <div key={m} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0", borderBottom: `1px solid ${C.g100}` }}>
+                      <span style={{ fontSize: 14, color: C.g700 }}>{m}</span>
+                      <span style={{ fontSize: 15, fontWeight: 800, color: col as string }}>{v}</span>
+                    </div>
+                  ))}
+                </div>
+              </AppLayout>
+            </Thumb>
+          </ScreenRow>
+        </FlowSection>
+
+        {/* ── FLOW 7: User Management ─────────────────────────── */}
+        <FlowSection num={8} title="User Management" desc="Manage users, roles, teams and permissions" color="#F59E0B">
+          <ScreenRow>
+            <Thumb label="User Management"><UserManagementScreen /></Thumb>
+            <Arr />
+            <Thumb label="Users List">
+              <AppLayout active="users" title="Users" breadcrumb={["Home", "User Management", "Users"]}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 18 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, background: "white", border: `1px solid ${C.g200}`, borderRadius: 10, padding: "10px 16px", width: 280 }}><Search size={15} color={C.g400} /><span style={{ fontSize: 13, color: C.g400 }}>Search users...</span></div>
+                  <button style={{ display: "flex", alignItems: "center", gap: 8, background: C.blue, color: "white", border: "none", borderRadius: 10, padding: "10px 18px", fontSize: 13, fontWeight: 600 }}><Plus size={14} /> Invite User</button>
+                </div>
+                <div style={{ background: "white", borderRadius: 14, border: `1px solid ${C.g100}`, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                  {[["Sarah Chen", "Admin", "Finance", "Active"], ["Mark Lee", "Manager", "Research", "Active"], ["Jennifer Walsh", "Manager", "Operations", "Active"], ["Alex Thompson", "Admin", "Executive", "Active"], ["Lisa Park", "Reviewer", "Procurement", "Active"], ["Tom Wright", "Viewer", "Product", "Inactive"]].map(([n, r, d, s], i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 18px", borderBottom: `1px solid ${C.g100}` }}>
+                      <div style={{ width: 36, height: 36, borderRadius: "50%", background: `linear-gradient(135deg,${C.blue},${C.purple})`, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ color: "white", fontSize: 12, fontWeight: 700 }}>{(n as string).split(" ").map((x: string) => x[0]).join("")}</span></div>
+                      <div style={{ flex: 1 }}><div style={{ fontSize: 14, fontWeight: 500, color: C.g800 }}>{n}</div><div style={{ fontSize: 12, color: C.g500 }}>{d}</div></div>
+                      <SBadge s={r} /><SBadge s={s} />
+                    </div>
+                  ))}
+                </div>
+              </AppLayout>
+            </Thumb>
+            <Arr />
+            <Thumb label="Roles">
+              <AppLayout active="users" title="Roles" breadcrumb={["Home", "User Management", "Roles"]}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                  {[["Administrator", "Full platform access including user management and system configuration", C.blue, 4, ["all_permissions"]], ["Manager", "Approve/reject decisions, manage team workflows, generate reports", C.purple, 12, ["approve", "reject", "reports"]], ["Reviewer", "Review and comment on submitted decisions within assigned scope", C.indigo, 38, ["review", "comment"]], ["Viewer", "Read-only access to approved decisions in the knowledge repository", C.g500, 18, ["view_approved"]]].map(([role, desc, col, count, perms]: any) => (
+                    <div key={role} style={{ background: "white", borderRadius: 16, padding: 22, border: `1px solid ${C.g100}`, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                        <div style={{ width: 40, height: 40, borderRadius: 10, background: `${col}18`, display: "flex", alignItems: "center", justifyContent: "center" }}><Shield size={20} color={col} /></div>
+                        <span style={{ fontSize: 12, color: C.g400 }}>{count} users</span>
+                      </div>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: C.g900, marginBottom: 6 }}>{role}</div>
+                      <p style={{ fontSize: 13, color: C.g500, lineHeight: 1.6, margin: "0 0 14px" }}>{desc}</p>
+                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                        {perms.map((p: string) => <span key={p} style={{ fontSize: 11, fontWeight: 600, color: col, background: `${col}15`, padding: "3px 10px", borderRadius: 20 }}>{p}</span>)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </AppLayout>
+            </Thumb>
+            <Arr />
+            <Thumb label="Permissions">
+              <AppLayout active="users" title="Permissions" breadcrumb={["Home", "User Management", "Permissions"]}>
+                <div style={{ background: "white", borderRadius: 16, border: `1px solid ${C.g100}`, boxShadow: "0 2px 8px rgba(0,0,0,0.05)", overflow: "hidden" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                    <thead>
+                      <tr style={{ background: C.g50 }}>
+                        <th style={{ padding: "14px 20px", fontSize: 12, fontWeight: 700, color: C.g500, textAlign: "left", textTransform: "uppercase", letterSpacing: "0.05em" }}>Permission</th>
+                        {["Admin", "Manager", "Reviewer", "Viewer"].map(r => <th key={r} style={{ padding: "14px 20px", fontSize: 12, fontWeight: 700, color: C.g500, textAlign: "center", textTransform: "uppercase", letterSpacing: "0.05em" }}>{r}</th>)}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[["Create Decision", true, true, false, false], ["Submit Decision", true, true, true, false], ["Review Decision", true, true, true, false], ["Approve Decision", true, true, false, false], ["View Knowledge Repo", true, true, true, true], ["Generate Reports", true, true, false, false], ["Manage Users", true, false, false, false], ["System Config", true, false, false, false]].map(([perm, ...vals]) => (
+                        <tr key={perm} style={{ borderTop: `1px solid ${C.g100}` }}>
+                          <td style={{ padding: "12px 20px", fontSize: 13, color: C.g700 }}>{perm}</td>
+                          {vals.map((v, i) => <td key={i} style={{ padding: "12px 20px", textAlign: "center" }}>{v ? <Check size={16} color={C.green} /> : <X size={16} color={C.g300} />}</td>)}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </AppLayout>
+            </Thumb>
+          </ScreenRow>
+        </FlowSection>
+
+        {/* ── FLOW 8: Audit & Compliance ──────────────────────── */}
+        <FlowSection num={9} title="Audit & Compliance" desc="Complete traceability, version history and security monitoring" color={C.red}>
+          <ScreenRow>
+            <Thumb label="Audit Dashboard"><AuditDashboardScreen /></Thumb>
+            <Arr />
+            <Thumb label="Activity Logs">
+              <AppLayout active="audit" title="Activity Logs" breadcrumb={["Home", "Audit", "Activity"]}>
+                <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, background: "white", border: `2px solid ${C.blue}`, borderRadius: 10, padding: "10px 16px", flex: 1 }}><Search size={15} color={C.blue} /><span style={{ fontSize: 13, color: C.g400 }}>Filter logs...</span></div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, background: "white", border: `1px solid ${C.g200}`, borderRadius: 10, padding: "10px 14px" }}><Calendar size={14} color={C.g500} /><span style={{ fontSize: 13, color: C.g600 }}>Today</span></div>
+                </div>
+                <div style={{ background: "white", borderRadius: 14, border: `1px solid ${C.g100}`, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                  {[["14:32", "John Doe", "Approved DEC-2847", "green"], ["13:18", "Sarah Chen", "Uploaded document to DEC-2848", "blue"], ["12:05", "Mark Lee", "Submitted review for DEC-2848", "blue"], ["11:22", "Unknown", "Failed login attempt (3x)", "red"], ["10:45", "Lisa Park", "Viewed DEC-2801", "gray"], ["09:30", "System", "Automatic policy check completed", "gray"]].map(([time, user, action, col], i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 16, padding: "13px 20px", borderBottom: `1px solid ${C.g100}`, background: col === "red" ? "#FFF5F5" : "white" }}>
+                      <span style={{ fontSize: 12, color: C.g400, fontFamily: "monospace", width: 40 }}>{time}</span>
+                      <div style={{ width: 30, height: 30, borderRadius: "50%", background: col === "green" ? C.greenL : col === "red" ? C.redL : C.blueL, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <Activity size={14} color={col === "green" ? C.green : col === "red" ? C.red : C.blue} />
+                      </div>
+                      <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 500, color: C.g800 }}>{user}</div><div style={{ fontSize: 12, color: C.g500 }}>{action}</div></div>
+                    </div>
+                  ))}
+                </div>
+              </AppLayout>
+            </Thumb>
+            <Arr />
+            <Thumb label="Version History">
+              <AppLayout active="audit" title="Version History" breadcrumb={["Home", "Audit", "Versions"]}>
+                <div style={{ background: "white", borderRadius: 14, border: `1px solid ${C.g100}`, padding: 24, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: C.g900, marginBottom: 6 }}>DEC-2847 — Version History</div>
+                  <div style={{ fontSize: 13, color: C.g500, marginBottom: 20 }}>Q4 Technology Budget Allocation</div>
+                  {[["v3.0", "Dec 22, 2024", "Final version — Approved by Administrator", "Approved"], ["v2.1", "Dec 18, 2024", "Budget figures revised per reviewer feedback", "Review"], ["v2.0", "Dec 16, 2024", "Added vendor comparison document", "Review"], ["v1.1", "Dec 15, 2024", "Updated alternative analysis scores", "Draft"], ["v1.0", "Dec 14, 2024", "Initial submission", "Draft"]].map(([ver, date, desc, s], i) => (
+                    <div key={ver} style={{ display: "flex", gap: 14, marginBottom: i < 4 ? 0 : 0 }}>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: "50%", background: i === 0 ? C.blue : C.g100, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <span style={{ fontSize: 10, fontWeight: 800, color: i === 0 ? "white" : C.g500 }}>{ver}</span>
+                        </div>
+                        {i < 4 && <div style={{ width: 2, height: 28, background: C.g200 }} />}
+                      </div>
+                      <div style={{ paddingBottom: i < 4 ? 16 : 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 3 }}>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: C.g800 }}>{ver}</span>
+                          <SBadge s={s} /><span style={{ fontSize: 12, color: C.g400 }}>{date}</span>
+                        </div>
+                        <p style={{ fontSize: 13, color: C.g500, margin: 0 }}>{desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </AppLayout>
+            </Thumb>
+            <Arr />
+            <Thumb label="Security Logs">
+              <AppLayout active="audit" title="Security Logs" breadcrumb={["Home", "Audit", "Security"]}>
+                <div style={{ background: C.redL, border: `1px solid ${C.red}40`, borderRadius: 14, padding: "16px 20px", marginBottom: 18, display: "flex", alignItems: "center", gap: 12 }}>
+                  <AlertTriangle size={20} color={C.red} />
+                  <div><div style={{ fontSize: 14, fontWeight: 700, color: C.red }}>3 Security Alerts Require Attention</div><div style={{ fontSize: 13, color: C.g600, marginTop: 2 }}>Multiple failed login attempts detected from IP 203.0.113.25</div></div>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 18 }}>
+                  {[["Failed Logins", "12", C.red], ["Suspicious IPs", "3", C.amber], ["Locked Accounts", "1", C.purple]].map(([l, v, col]) => (
+                    <div key={l} style={{ background: "white", borderRadius: 12, padding: 18, border: `1px solid ${C.g100}`, boxShadow: "0 2px 6px rgba(0,0,0,0.05)" }}>
+                      <div style={{ fontSize: 11, color: C.g500, marginBottom: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{l}</div>
+                      <div style={{ fontSize: 28, fontWeight: 900, color: col as string }}>{v}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ background: "white", borderRadius: 14, border: `1px solid ${C.g100}`, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                  <div style={{ padding: "14px 20px", borderBottom: `1px solid ${C.g100}`, fontSize: 14, fontWeight: 700, color: C.g800 }}>Recent Security Events</div>
+                  {[["11:22:08", "LOGIN_FAIL", "203.0.113.25", "red"], ["11:20:44", "LOGIN_FAIL", "203.0.113.25", "red"], ["11:18:12", "LOGIN_FAIL", "203.0.113.25", "red"], ["09:30:00", "ROLE_CHANGE", "10.0.0.1", "amber"], ["08:15:33", "EXPORT_DATA", "10.0.2.12", "blue"]].map(([time, event, ip, col], i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 20px", borderBottom: `1px solid ${C.g100}`, background: col === "red" ? "#FFF5F5" : "white" }}>
+                      <span style={{ fontSize: 11, color: C.g400, fontFamily: "monospace", width: 56 }}>{time}</span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: col === "red" ? C.red : col === "amber" ? C.amber : C.blue, fontFamily: "monospace", flex: 1 }}>{event}</span>
+                      <span style={{ fontSize: 12, color: C.g500, fontFamily: "monospace" }}>{ip}</span>
+                    </div>
+                  ))}
+                </div>
+              </AppLayout>
+            </Thumb>
+          </ScreenRow>
+        </FlowSection>
+
+        {/* ── FLOW 10: Email & Support ────────────────────────── */}
+        <FlowSection num={10} title="Email & Support" desc="Internal email service and support center for platform users" color={C.teal}>
+          <ScreenRow>
+            <Thumb label="Email Service"><EmailServiceScreen /></Thumb>
+            <Arr />
+            <Thumb label="Support Center"><SupportCenterScreen /></Thumb>
+          </ScreenRow>
+        </FlowSection>
+
+        {/* ── FLOW 11: Settings ───────────────────────────────── */}
+        <FlowSection num={11} title="Settings" desc="User account preferences, security, notifications and system configuration" color={C.indigo}>
+          <ScreenRow>
+            <Thumb label="Settings"><SettingsScreen /></Thumb>
+          </ScreenRow>
+        </FlowSection>
+
+      </div>
+
+      {/* Footer */}
+      <div style={{ borderTop: `1px solid ${C.g200}`, padding: "28px 64px", display: "flex", justifyContent: "space-between", alignItems: "center", background: "white" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: C.blue, display: "flex", alignItems: "center", justifyContent: "center" }}><Zap size={16} color="white" /></div>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: C.g800 }}>Expert Decision Replay Platform</div>
+            <div style={{ fontSize: 12, color: C.g400 }}>UX/UI Flow Diagram · Enterprise Decision Management System</div>
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 24 }}>
+          {["11 Flows", "21 Screens", "4 Roles", "Full Audit Trail"].map(item => (
+            <span key={item} style={{ fontSize: 12, fontWeight: 600, color: C.g500 }}>{item}</span>
+          ))}
+        </div>
+        <div style={{ fontSize: 12, color: C.g400 }}>© 2024 EDRP Enterprise Platform</div>
+      </div>
+    </div>
+  );
+}

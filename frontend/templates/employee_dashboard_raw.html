@@ -1,0 +1,219 @@
+export function EmployeeReviewerDashboardScreen() {
+  const decisions = [
+    { id: "DEC-3142", title: "Cloud Infrastructure Migration Strategy", category: "Technology", updated: "2 hours ago", status: "Pending", reviewer: "Dr. A. Rivera", priority: "High" },
+    { id: "DEC-3138", title: "Remote Work Policy Revision Q1 2026", category: "HR Policy", updated: "5 hours ago", status: "Review", reviewer: "M. Johnson", priority: "Medium" },
+    { id: "DEC-3135", title: "Q1 Budget Allocation — Engineering Team", category: "Finance", updated: "1 day ago", status: "Approved", reviewer: "S. Chen", priority: "High" },
+    { id: "DEC-3129", title: "New Vendor Onboarding Process", category: "Procurement", updated: "2 days ago", status: "Draft", reviewer: "L. Park", priority: "Low" },
+    { id: "DEC-3121", title: "Security Compliance Framework Update", category: "Security", updated: "3 days ago", status: "Approved", reviewer: "T. Wright", priority: "Critical" },
+  ];
+
+  const tasks = [
+    { id: 1, type: "Review Request", title: "Remote Work Policy Revision Q1 2026", deadline: "Today, 5:00 PM", icon: FileCheck, color: C.amber },
+    { id: 2, type: "Document Update", title: "Security Compliance Framework — Attachments needed", deadline: "Tomorrow", icon: Upload, color: C.blue },
+    { id: 3, type: "Approval Pending", title: "Product Roadmap Q1 2026 — Awaiting reviewer feedback", deadline: "Jan 13, 2026", icon: CheckSquare, color: C.purple },
+    { id: 4, type: "Comment Reply", title: "Employee Benefits Package — Respond to discussion", deadline: "Jan 14, 2026", icon: MessageSquare, color: C.indigo },
+    { id: 5, type: "Draft Completion", title: "Complete New Vendor Onboarding decision draft", deadline: "Jan 15, 2026", icon: Edit3, color: C.g500 },
+  ];
+
+  const notifications = [
+    { id: 1, type: "Review Request", msg: "Dr. A. Rivera requested your review on Cloud Infrastructure Migration", time: "5 min ago", icon: Eye, color: C.blue },
+    { id: 2, type: "Mention", msg: "Sarah Chen mentioned you in Q1 Budget Allocation discussion", time: "1 hour ago", icon: Star, color: C.purple },
+    { id: 3, type: "Status Update", msg: "Your decision 'Security Compliance Framework' has been approved", time: "2 hours ago", icon: CheckSquare, color: C.green },
+    { id: 4, type: "Comment", msg: "New comment on Remote Work Policy Revision", time: "3 hours ago", icon: MessageSquare, color: C.indigo },
+    { id: 5, type: "Reminder", msg: "Document upload required for Security Compliance Framework", time: "4 hours ago", icon: Clock, color: C.amber },
+    { id: 6, type: "Approval", msg: "Your decision DEC-3135 moved to approval stage", time: "5 hours ago", icon: ArrowRight, color: C.blue },
+  ];
+
+  const activities = [
+    { id: 1, action: "submitted", title: "Cloud Infrastructure Migration Strategy", user: "You", time: "2 hours ago", icon: Send, color: C.blue },
+    { id: 2, action: "commented on", title: "Remote Work Policy Revision Q1 2026", user: "You", time: "5 hours ago", icon: MessageSquare, color: C.purple },
+    { id: 3, action: "approved", title: "Q1 Budget Allocation — Engineering Team", user: "Sarah Chen", time: "1 day ago", icon: CheckSquare, color: C.green },
+    { id: 4, action: "updated", title: "New Vendor Onboarding Process", user: "You", time: "2 days ago", icon: Edit3, color: C.amber },
+    { id: 5, action: "reviewed", title: "Security Compliance Framework Update", user: "Dr. M. Lee", time: "3 days ago", icon: Eye, color: C.indigo },
+  ];
+
+  return (
+    <AppLayout active="dashboard" title="Employee / Reviewer Dashboard" breadcrumb={["Home", "Employee / Reviewer Dashboard"]}>
+      {/* Role identity accent — Blue: task-focused employee view */}
+      <div style="display: flex; align-items: center; gap: 12; background: white; border: #F1F5F9; border-radius: 12px; padding: 12px 18px; margin-bottom: 20; box-shadow: 0 1px 4px rgba(37;">
+        <div style="width: 4px; height: 36px; background: `linear-gradient(180deg; border-radius: 2px; flex-shrink: 0;" />
+        <div>
+          <div style="font-size: 13px; font-weight: 700; color: #0F172A;">Employee / Reviewer Dashboard</div>
+          <div style="font-size: 11px; color: C.g400; margin-top: 1;">Your personal workspace — decisions, tasks and reviews assigned to you.</div>
+        </div>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 6; background: #2563EB; border: #2563EB; border-radius: 8px; padding: 5px 12px;">
+          <div style="width: 7px; height: 7px; border-radius: 50%; background: #2563EB;" />
+          <span style="font-size: 11px; font-weight: 700; color: #2563EB;">Employee · Reviewer</span>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4; gap: 18; margin-bottom: 24;">
+        {[[FileText, "My Decisions", "23", "Total active", C.blue, C.blueL], [Edit3, "Draft Decisions", "5", "In progress", C.amber, C.amberL], [Clock, "Pending Reviews", "8", "Awaiting review", C.purple, C.purpleL], [CheckSquare, "Approved Decisions", "12", "This month", C.green, C.greenL]].map(([Icon, label, val, desc, col, bg]: any) => (
+          <div key={label} style="background: white; border-radius: 14px; padding: 20px; box-shadow: 0 2px 10px rgba(0; border: #F1F5F9; cursor: pointer; transition: transform 0.2s;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16;">
+              <div style="width: 48px; height: 48px; border-radius: 12px; background: bg; display: flex; align-items: center; justify-content: center; box-shadow: `0 4px 12px ${col}22`;"><Icon size={24} color={col} /></div>
+              <ArrowRight size={18} color={C.g300} />
+            </div>
+            <div style="font-size: 28px; font-weight: 900; color: #0F172A; letter-spacing: -0.03em; margin-bottom: 4;">{val}</div>
+            <div style="font-size: 14px; font-weight: 700; color: C.g700; margin-bottom: 2;">{label}</div>
+            <div style="font-size: 12px; color: C.g400;">{desc}</div>
+          </div>
+        ))}
+      </div>
+      <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 10px rgba(0; border: #F1F5F9; margin-bottom: 24;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20;">
+          <div><div style="font-size: 17px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em;">My Pending Tasks</div><div style="font-size: 13px; color: C.g400; margin-top: 2;">Tasks and actions requiring your attention</div></div>
+          <span style="font-size: 13px; font-weight: 700; color: #2563EB; cursor: pointer;">View All →</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12;">
+          {tasks.map((task) => { const Icon = task.icon; return (
+            <div key={task.id} style="border: #E2E8F0; border-radius: 12px; padding: 14px 16px; background: C.g50; cursor: pointer; transition: all 0.2s;">
+              <div style="display: flex; gap: 12; align-items: flex-start;">
+                <div style="width: 38px; height: 38px; border-radius: 10px; background: `${task.color}18`; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><Icon size={18} color={task.color} /></div>
+                <div style="flex: 1;">
+                  <div style="font-size: 12px; font-weight: 600; color: task.color; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 4;">{task.type}</div>
+                  <div style="font-size: 14px; font-weight: 600; color: C.g800; margin-bottom: 6; line-height: 1.3;">{task.title}</div>
+                  <div style="display: flex; align-items: center; gap: 4;"><Clock size={12} color={C.g400} /><span style="font-size: 12px; color: #64748B;">{task.deadline}</span></div>
+                </div>
+              </div>
+            </div>
+          );})}
+        </div>
+      </div>
+      <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 10px rgba(0; border: #F1F5F9; margin-bottom: 24;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20;">
+          <div><div style="font-size: 17px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em;">Recent Notifications</div><div style="font-size: 13px; color: C.g400; margin-top: 2;">Latest updates and alerts</div></div>
+          <div style="position: relative;"><Bell size={20} color={C.g400} /><div style="position: absolute; top: -4; right: -4; width: 16px; height: 16px; background: #EF4444; border-radius: 50%; border: 2px solid white; display: flex; align-items: center; justify-content: center;"><span style="color: white; font-size: 9px; font-weight: 700;">6</span></div></div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10;">
+          {notifications.map((notif) => { const Icon = notif.icon; return (
+            <div key={notif.id} style="padding: 12px 14px; border-radius: 10px; background: C.g50; border: #F1F5F9; cursor: pointer; transition: all 0.2s;">
+              <div style="display: flex; gap: 10; align-items: flex-start;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: `${notif.color}18`; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><Icon size={15} color={notif.color} /></div>
+                <div style="flex: 1;"><div style="font-size: 11px; font-weight: 700; color: notif.color; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 3;">{notif.type}</div><div style="font-size: 13px; color: C.g700; line-height: 1.4; margin-bottom: 4;">{notif.msg}</div><div style="font-size: 11px; color: C.g400;">{notif.time}</div></div>
+              </div>
+            </div>
+          );})}
+        </div>
+      </div>
+      <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 10px rgba(0; border: #F1F5F9; margin-bottom: 24;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20;">
+          <div><div style="font-size: 17px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em;">Recent Activities</div><div style="font-size: 13px; color: C.g400; margin-top: 2;">Your activity timeline</div></div>
+          <span style="font-size: 13px; font-weight: 700; color: #2563EB; cursor: pointer;">View All →</span>
+        </div>
+        <div style="position: relative; padding-left: 40;">
+          {activities.map((activity, index) => { const Icon = activity.icon; const isLast = index === activities.length - 1; return (
+            <div key={activity.id} style="position: relative; padding-bottom: isLast ? 0 : 24;">
+              {!isLast && <div style="position: absolute; left: -24; top: 40px; width: 2px; height: calc(100% - 16px); background: #E2E8F0;" />}
+              <div style="position: absolute; left: -32; top: 0px; width: 32px; height: 32px; border-radius: 50%; background: `${activity.color}18`; border: `2px solid ${activity.color}`; display: flex; align-items: center; justify-content: center;"><Icon size={14} color={activity.color} /></div>
+              <div style="background: C.g50; border: #F1F5F9; border-radius: 10px; padding: 12px 16px;">
+                <div style="font-size: 14px; color: C.g800; margin-bottom: 4;"><span style="font-weight: 700; color: #2563EB;">{activity.user}</span><span style="color: C.g600;"> {activity.action} </span><span style="font-weight: 600; color: C.g800;">{activity.title}</span></div>
+                <div style="font-size: 12px; color: C.g400;">{activity.time}</div>
+              </div>
+            </div>
+          );})}
+        </div>
+      </div>
+      <div style="background: white; border-radius: 16px; box-shadow: 0 2px 10px rgba(0; border: #F1F5F9; margin-bottom: 24;">
+        <div style="padding: 20px 26px; border-bottom: #F1F5F9; display: flex; justify-content: space-between; align-items: center;">
+          <div><div style="font-size: 17px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em;">Recent Decisions</div><div style="font-size: 13px; color: C.g400; margin-top: 2;">Your recent decision submissions</div></div>
+          <button style="font-size: 13px; color: #2563EB; font-weight: 600; background: none; border: none; cursor: pointer;">View All →</button>
+        </div>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead><tr style="background: C.g50;">{["Decision", "Category", "Reviewer", "Status", "Priority", "Last Updated", "Actions"].map(h => <th key={h} style="padding: 13px 26px; font-size: 11px; font-weight: 700; color: #64748B; text-align: left; text-transform: uppercase; letter-spacing: 0.06em;">{h}</th>)}</tr></thead>
+            <tbody>{decisions.map((dec) => (
+              <tr key={dec.id} style="border-top: #F1F5F9; transition: background 0.2s; cursor: pointer;">
+                <td style="padding: 16px 26px;"><div style="font-size: 14px; font-weight: 600; color: C.g800; margin-bottom: 3;">{dec.title}</div><div style="font-size: 12px; color: C.g400; font-family: monospace;">{dec.id}</div></td>
+                <td style="padding: 16px 26px;"><span style="font-size: 12px; font-weight: 600; color: #2563EB; background: #2563EB; padding: 4px 10px; border-radius: 16px;">{dec.category}</span></td>
+                <td style="padding: 16px 26px;"><div style="display: flex; align-items: center; gap: 8;"><div style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg; display: flex; align-items: center; justify-content: center; font-size: 11px; color: white; font-weight: 700;">{dec.reviewer.split(" ").map(n => n[0]).join("")}</div><span style="font-size: 13px; color: C.g600;">{dec.reviewer}</span></div></td>
+                <td style="padding: 16px 26px;"><SBadge s={dec.status} /></td>
+                <td style="padding: 16px 26px;"><span style="font-size: 12px; font-weight: 600; color: #2563EB; background: #2563EB; padding: 4px 11px; border-radius: 20px;">{dec.priority}</span></td>
+                <td style="padding: 16px 26px; font-size: 13px; color: #64748B;">{dec.updated}</td>
+                <td style="padding: 16px 26px;"><div style="display: flex; gap: 8;"><button style="padding: 6px 10px; border: #E2E8F0; border-radius: 7px; background: white; cursor: pointer;"><Eye size={15} color={C.g500} /></button><button style="padding: 6px 10px; border: #E2E8F0; border-radius: 7px; background: white; cursor: pointer;"><MoreHorizontal size={15} color={C.g500} /></button></div></td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>
+      </div>
+      <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 10px rgba(0; border: #F1F5F9;">
+        <div style="font-size: 17px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em; margin-bottom: 18;">Quick Actions</div>
+        <div style="display: grid; grid-template-columns: repeat(4; gap: 14;">
+          {[[PlusCircle, "Create Decision", C.blue, C.blueL], [Search, "Search Decisions", C.purple, C.purpleL], [Upload, "Upload Document", C.green, C.greenL], [BookOpen, "Knowledge Repository", C.indigo, C.indigoL]].map(([Icon, label, col, bg]: any) => (
+            <button key={label} style="display: flex; flex-direction: column; align-items: center; gap: 12; padding: 20px 16px; border: #E2E8F0; border-radius: 12px; background: white; cursor: pointer; transition: all 0.2s;">
+              <div style="width: 48px; height: 48px; border-radius: 12px; background: bg; display: flex; align-items: center; justify-content: center; box-shadow: `0 4px 12px ${col}22`;"><Icon size={22} color={col} /></div>
+              <span style="font-size: 14px; font-weight: 600; color: C.g800; text-align: center;">{label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </AppLayout>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SCREEN 3c: MANAGER DASHBOARD
+// ══════════════════════════════════════════════════════════════════
+const MGR_NAV_ITEMS = [
+  { id: "dashboard", label: "Dashboard", Icon: LayoutDashboard },
+  { id: "team-decisions", label: "Team Decisions", Icon: FileText },
+  { id: "pending-approvals", label: "Pending Approvals", Icon: CheckSquare, badge: 7 },
+  { id: "discussions", label: "Discussion Module", Icon: MessageSquare },
+  { id: "knowledge", label: "Knowledge Repository", Icon: BookOpen },
+  { id: "reports", label: "Reports", Icon: BarChart2 },
+  { id: "notifications", label: "Notifications", Icon: Bell },
+  { id: "profile", label: "Profile", Icon: Users },
+  { id: "settings", label: "Settings", Icon: Settings },
+];
+
+function ManagerSidebar({ active }: { active: string }) {
+  return (
+    <div style="width: 240px; height: 100%; background: C.navy; display: flex; flex-direction: column; flex-shrink: 0;">
+      <div style="padding: 28px 20px 22px; border-bottom: 1px solid rgba(255;">
+        <div style="display: flex; align-items: center; gap: 12;">
+          <div style="width: 40px; height: 40px; border-radius: 10px; background: C.teal; display: flex; align-items: center; justify-content: center;">
+            <Zap size={21} color="white" />
+          </div>
+          <div>
+            <div style="color: white; font-size: 15px; font-weight: 800; letter-spacing: -0.02em;">EDRP</div>
+            <div style="color: C.g400; font-size: 11px;">Decision Platform</div>
+          </div>
+        </div>
+      </div>
+      <nav style="flex: 1; padding: 14px 10px; overflow: hidden;">
+        {MGR_NAV_ITEMS.map(({ id, label, Icon, badge }: any) => {
+          const on = active === id;
+          return (
+            <div key={id} style="display: flex; align-items: center; gap: 10; padding: 9px 12px; border-radius: 8px; margin-bottom: 2; background: on ? C.teal : transparent;">
+              <Icon size={16} color={on ? "white" : C.g400} />
+              <span style="font-size: 13px; font-weight: on ? 600 : 400; color: on ? white : C.g400; flex: 1;">{label}</span>
+              {badge && <span style="background: #EF4444; color: white; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 10px;">{badge}</span>}
+            </div>
+          );
+        })}
+      </nav>
+      <div style="padding: 16px 14px; border-top: 1px solid rgba(255;">
+        <div style="display: flex; align-items: center; gap: 10;">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg; display: flex; align-items: center; justify-content: center;">
+            <span style="color: white; font-size: 13px; font-weight: 700;">MR</span>
+          </div>
+          <div>
+            <div style="color: white; font-size: 13px; font-weight: 500;">M. Rodriguez</div>
+            <div style="color: C.g400; font-size: 11px;">Manager</div>
+          </div>
+          <LogOut size={15} color={C.g400} style="margin-left: auto;" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ManagerAppLayout({ active, title, breadcrumb, children }: any) {
+  return (
+    <div style="width: FW; height: FH; display: flex; background: C.g50; font-family: Inter; overflow: hidden;">
+      <ManagerSidebar active={active} />
+      <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+        <TopNav title={title} breadcrumb={breadcrumb} />
+        <div style="flex: 1; overflow-y: auto; padding: 28px;">{children}</div>
+      </div>
+    </div>
+  );

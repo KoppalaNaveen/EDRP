@@ -13,6 +13,8 @@ class DashboardRepository:
     @staticmethod
     def get_dashboard(db: Session, user_id: int):
 
+        import hashlib
+
         user = (
             db.query(User)
             .filter(User.id == user_id)
@@ -34,54 +36,44 @@ class DashboardRepository:
             .first()
         )
 
-        total_decisions = (
-            db.query(Decision)
-            .filter(Decision.created_by == user_id)
-            .count()
-        )
+        role_name = role.role_name if role else "User"
 
-        pending_reviews = (
-            db.query(Review)
-            .filter(
-                Review.reviewer_id == user_id,
-                Review.status == "Pending"
-            )
-            .count()
-        )
+        # Apply Hash for User Details if not Administrator
+        if role_name == "Administrator" or role_name == "Admin":
+            display_user = user.full_name
+        else:
+            # Mask or hash user details
+            display_user = hashlib.sha256(user.full_name.encode()).hexdigest()[:12]
 
-        total_replays = (
-            db.query(Replay)
-            .filter(Replay.performed_by == user_id)
-            .count()
-        )
+        if role_name == "Administrator" or role_name == "Admin":
+            total_decisions = db.query(Decision).count()
+            pending_reviews = db.query(Review).filter(Review.status == "Pending").count()
+            total_replays = db.query(Replay).count()
+            recent_decisions = db.query(Decision).order_by(Decision.id.desc()).limit(5).all()
+            recent_reviews = db.query(Review).order_by(Review.id.desc()).limit(5).all()
+            recent_replays = db.query(Replay).order_by(Replay.id.desc()).limit(5).all()
 
-        recent_decisions = (
-            db.query(Decision)
-            .filter(Decision.created_by == user_id)
-            .order_by(Decision.id.desc())
-            .limit(5)
-            .all()
-        )
+        elif role_name == "Manager":
+            # Manager sees decisions from their team members
+            team_users = [u.id for u in db.query(User).filter(User.team_id == user.team_id).all()]
+            total_decisions = db.query(Decision).filter(Decision.created_by.in_(team_users)).count()
+            pending_reviews = db.query(Review).filter(Review.reviewer_id == user_id, Review.status == "Pending").count()
+            total_replays = db.query(Replay).filter(Replay.performed_by.in_(team_users)).count()
+            recent_decisions = db.query(Decision).filter(Decision.created_by.in_(team_users)).order_by(Decision.id.desc()).limit(5).all()
+            recent_reviews = db.query(Review).filter(Review.reviewer_id == user_id).order_by(Review.id.desc()).limit(5).all()
+            recent_replays = db.query(Replay).filter(Replay.performed_by.in_(team_users)).order_by(Replay.id.desc()).limit(5).all()
 
-        recent_reviews = (
-            db.query(Review)
-            .filter(Review.reviewer_id == user_id)
-            .order_by(Review.id.desc())
-            .limit(5)
-            .all()
-        )
-
-        recent_replays = (
-            db.query(Replay)
-            .filter(Replay.performed_by == user_id)
-            .order_by(Replay.id.desc())
-            .limit(5)
-            .all()
-        )
+        else: # Employee / Reviewer
+            total_decisions = db.query(Decision).filter(Decision.created_by == user_id).count()
+            pending_reviews = db.query(Review).filter(Review.reviewer_id == user_id, Review.status == "Pending").count()
+            total_replays = db.query(Replay).filter(Replay.performed_by == user_id).count()
+            recent_decisions = db.query(Decision).filter(Decision.created_by == user_id).order_by(Decision.id.desc()).limit(5).all()
+            recent_reviews = db.query(Review).filter(Review.reviewer_id == user_id).order_by(Review.id.desc()).limit(5).all()
+            recent_replays = db.query(Replay).filter(Replay.performed_by == user_id).order_by(Replay.id.desc()).limit(5).all()
 
         return {
-            "user": user.full_name,
-            "role": role.role_name if role else "",
+            "user": display_user,
+            "role": role_name,
             "team": team.team_name if team else "",
 
             "total_decisions": total_decisions,

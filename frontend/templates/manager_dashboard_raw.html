@@ -1,0 +1,385 @@
+export function ManagerDashboardScreen() {
+  const teamDecisions = [
+    { id: "DEC-3150", title: "Cloud Infrastructure Migration Strategy", dept: "Technology", submittedBy: "J. Doe", reviewer: "Dr. A. Rivera", priority: "High", status: "Pending", deadline: "Jan 14, 2026" },
+    { id: "DEC-3147", title: "Remote Work Policy Revision Q1 2026", dept: "HR Policy", submittedBy: "S. Chen", reviewer: "M. Johnson", priority: "Medium", status: "Review", deadline: "Jan 16, 2026" },
+    { id: "DEC-3143", title: "Q1 Budget Allocation — Engineering", dept: "Finance", submittedBy: "L. Park", reviewer: "Unassigned", priority: "High", status: "Draft", deadline: "Jan 18, 2026" },
+    { id: "DEC-3139", title: "New Vendor Onboarding Process", dept: "Procurement", submittedBy: "T. Wright", reviewer: "S. Chen", priority: "Low", status: "Approved", deadline: "Jan 20, 2026" },
+    { id: "DEC-3135", title: "Security Compliance Framework Update", dept: "Security", submittedBy: "A. Patel", reviewer: "Dr. M. Lee", priority: "Critical", status: "Pending", deadline: "Jan 22, 2026" },
+  ];
+
+  const approvalQueue = [
+    { id: 1, title: "Cloud Infrastructure Migration Strategy", submittedBy: "J. Doe", dept: "Technology", priority: "High", waiting: "2 days", icon: FileText, color: C.blue },
+    { id: 2, title: "Security Compliance Framework Update", submittedBy: "A. Patel", dept: "Security", priority: "Critical", waiting: "1 day", icon: Shield, color: C.red },
+    { id: 3, title: "Remote Work Policy Revision Q1 2026", submittedBy: "S. Chen", dept: "HR Policy", priority: "Medium", waiting: "3 hours", icon: FileCheck, color: C.amber },
+    { id: 4, title: "Q2 Marketing Budget Proposal", submittedBy: "R. Kim", dept: "Marketing", priority: "Medium", waiting: "5 hours", icon: BarChart2, color: C.purple },
+  ];
+
+  const escalations = [
+    { id: "DEC-3135", title: "Security Compliance Framework Update", reason: "Awaiting senior sign-off — deadline in 2 days", priority: "Critical", color: C.red, bg: C.redL },
+    { id: "DEC-3150", title: "Cloud Infrastructure Migration Strategy", reason: "Reviewer unresponsive for 48 hours", priority: "High", color: C.amber, bg: C.amberL },
+    { id: "DEC-3143", title: "Q1 Budget Allocation — Engineering", reason: "No reviewer assigned — submission blocked", priority: "High", color: C.amber, bg: C.amberL },
+  ];
+
+  const awaitingReview = teamDecisions.filter(d => d.status === "Draft" || d.reviewer === "Unassigned" || d.status === "Review");
+
+  const teamActivities = [
+    { id: 1, action: "submitted", title: "Cloud Infrastructure Migration Strategy", user: "J. Doe", time: "2 hours ago", icon: Send, color: C.blue },
+    { id: 2, action: "commented on", title: "Remote Work Policy Revision Q1 2026", user: "S. Chen", time: "4 hours ago", icon: MessageSquare, color: C.purple },
+    { id: 3, action: "requested review for", title: "Q2 Marketing Budget Proposal", user: "R. Kim", time: "6 hours ago", icon: Eye, color: C.amber },
+    { id: 4, action: "updated", title: "New Vendor Onboarding Process", user: "T. Wright", time: "1 day ago", icon: Edit3, color: C.green },
+    { id: 5, action: "escalated", title: "Security Compliance Framework Update", user: "A. Patel", time: "1 day ago", icon: AlertTriangle, color: C.red },
+  ];
+
+  // Approval progress data — teal accent for in-review
+  const approvalStages = [
+    { label: "Submitted", count: 31, pct: 100, color: C.g300 },
+    { label: "In Review", count: 18, pct: 58, color: C.teal },
+    { label: "Approved", count: 11, pct: 35, color: C.green },
+    { label: "Pending You", count: 7, pct: 23, color: C.amber },
+  ];
+
+  // Team workload data — teal scale
+  const workload = [
+    { name: "J. Doe",    decisions: 6, color: C.teal   },
+    { name: "S. Chen",   decisions: 5, color: "#0D9488" },
+    { name: "A. Patel",  decisions: 4, color: "#0F766E" },
+    { name: "R. Kim",    decisions: 3, color: "#14B8A6" },
+    { name: "T. Wright", decisions: 2, color: "#5EEAD4" },
+  ];
+
+  const priorityCol = (p: string) => p === "Critical" ? C.red : p === "High" ? C.amber : p === "Medium" ? C.blue : C.g500;
+  const priorityBg  = (p: string) => p === "Critical" ? C.redL : p === "High" ? C.amberL : p === "Medium" ? C.blueL : C.g100;
+
+  const discussions = [
+    { id: 1, title: "Cloud Infrastructure Migration — Technical Concerns", replies: 12, participants: 4, lastActive: "30 min ago", unread: 3, color: C.teal },
+    { id: 2, title: "Remote Work Policy — HR Guidelines Discussion", replies: 8, participants: 6, lastActive: "2 hours ago", unread: 1, color: C.blue },
+    { id: 3, title: "Q1 Budget Allocation — Finance Review Thread", replies: 5, participants: 3, lastActive: "5 hours ago", unread: 0, color: C.purple },
+    { id: 4, title: "Security Compliance — Stakeholder Alignment", replies: 9, participants: 5, lastActive: "1 day ago", unread: 2, color: C.amber },
+  ];
+
+  return (
+    <ManagerAppLayout active="dashboard" title="Manager Dashboard" breadcrumb={["Home", "Manager Dashboard"]}>
+
+      {/* Role identity accent — Teal: team supervision view */}
+      <div style="display: flex; align-items: center; gap: 12; background: white; border: #F1F5F9; border-radius: 12px; padding: 12px 18px; margin-bottom: 20; box-shadow: 0 1px 4px rgba(20;">
+        <div style="width: 4px; height: 36px; background: `linear-gradient(180deg; border-radius: 2px; flex-shrink: 0;" />
+        <div>
+          <div style="font-size: 13px; font-weight: 700; color: #0F172A;">Manager Dashboard</div>
+          <div style="font-size: 11px; color: C.g400; margin-top: 1;">Team supervision — approvals, decisions and discussions assigned to your team.</div>
+        </div>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 6; background: C.tealL; border: `1px solid ${C.teal}30`; border-radius: 8px; padding: 5px 12px;">
+          <div style="width: 7px; height: 7px; border-radius: 50%; background: C.teal;" />
+          <span style="font-size: 11px; font-weight: 700; color: C.teal;">Manager</span>
+        </div>
+      </div>
+
+      {/* ── Summary Cards ──────────────────────────────────────── */}
+      <div style="display: grid; grid-template-columns: repeat(4; gap: 18; margin-bottom: 24;">
+        {([
+          [GitBranch, "Team Decisions",    "31", "+3 this week",      C.blue,   C.blueL],
+          [CheckSquare,"Pending Approvals","7",  "Requires action",   C.amber,  C.amberL],
+          [MessageSquare,"Active Discussions","14","Ongoing threads",  C.purple, C.purpleL],
+          [Users,      "Team Members",     "12", "In your team",      C.green,  C.greenL],
+        ] as const).map(([Icon, label, val, desc, col, bg]: any) => (
+          <div key={label} style="background: white; border-radius: 14px; padding: 20px; box-shadow: 0 1px 6px rgba(0; border: #F1F5F9; cursor: pointer;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14;">
+              <div style="width: 44px; height: 44px; border-radius: 12px; background: bg; display: flex; align-items: center; justify-content: center;"><Icon size={22} color={col} /></div>
+              <ArrowRight size={16} color={C.g300} />
+            </div>
+            <div style="font-size: 26px; font-weight: 900; color: #0F172A; letter-spacing: -0.03em; margin-bottom: 3;">{val}</div>
+            <div style="font-size: 13px; font-weight: 700; color: C.g700; margin-bottom: 2;">{label}</div>
+            <div style="font-size: 11px; color: C.g400;">{desc}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Left + Right: Approval Queue | Escalated Decisions ─── */}
+      <div style="display: grid; grid-template-columns: 3fr 2fr; gap: 20; margin-bottom: 20;">
+
+        {/* LEFT: Pending Approval Queue */}
+        <div style="background: white; border-radius: 16px; padding: 22px; box-shadow: 0 1px 6px rgba(0; border: #F1F5F9;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18;">
+            <div>
+              <div style="font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em;">Pending Approval Queue</div>
+              <div style="font-size: 12px; color: C.g400; margin-top: 2;">Decisions awaiting your action</div>
+            </div>
+            <span style="font-size: 11px; font-weight: 700; color: #2563EB; cursor: pointer; letter-spacing: 0.01em;">View all →</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10;">
+            {approvalQueue.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.id} style="border: #E2E8F0; border-radius: 10px; padding: 12px 14px; background: C.g50; display: flex; gap: 12; align-items: center;">
+                  <div style="width: 36px; height: 36px; border-radius: 9px; background: `${item.color}15`; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><Icon size={16} color={item.color} /></div>
+                  <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 13px; font-weight: 600; color: C.g800; margin-bottom: 3; white-space: nowrap as const; overflow: hidden; text-overflow: ellipsis;">{item.title}</div>
+                    <div style="display: flex; align-items: center; gap: 8;">
+                      <span style="font-size: 11px; color: #64748B;">{item.submittedBy}</span>
+                      <span style="font-size: 10px; color: C.g300;">·</span>
+                      <span style="font-size: 11px; color: #64748B;">{item.dept}</span>
+                      <span style="font-size: 10px; color: C.g300;">·</span>
+                      <span style="font-size: 11px; color: #F59E0B; font-weight: 600;">Waiting {item.waiting}</span>
+                    </div>
+                  </div>
+                  <span style="font-size: 10px; font-weight: 700; color: priorityCol(item.priority); background: priorityBg(item.priority); padding: 2px 8px; border-radius: 20px; flex-shrink: 0;">{item.priority}</span>
+                  <div style="display: flex; gap: 6; flex-shrink: 0;">
+                    <button style="padding: 6px 14px; background: C.teal; color: white; border: none; border-radius: 7px; font-size: 11px; font-weight: 700; cursor: pointer;">Approve</button>
+                    <button style="padding: 6px 12px; border: #E2E8F0; background: white; border-radius: 7px; font-size: 11px; font-weight: 600; color: C.g600; cursor: pointer;">Review</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* RIGHT: Escalated Decisions */}
+        <div style="background: white; border-radius: 16px; padding: 22px; box-shadow: 0 1px 6px rgba(0; border: #F1F5F9;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18;">
+            <div>
+              <div style="font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em;">Escalated Decisions</div>
+              <div style="font-size: 12px; color: C.g400; margin-top: 2;">Needs immediate attention</div>
+            </div>
+            <div style="width: 26px; height: 26px; background: #EF4444; border-radius: 8px; display: flex; align-items: center; justify-content: center;"><AlertTriangle size={13} color={C.red} /></div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10;">
+            {escalations.map((e) => (
+              <div key={e.id} style="padding: 12px 14px; border-radius: 10px; background: e.bg; border: `1px solid ${e.color}28`;">
+                <div style="display: flex; gap: 9; align-items: flex-start;">
+                  <AlertTriangle size={14} color={e.color} style="margin-top: 2; flex-shrink: 0;" />
+                  <div style="flex: 1;">
+                    <div style="font-size: 12px; font-weight: 700; color: C.g800; margin-bottom: 3; line-height: 1.3;">{e.title}</div>
+                    <div style="font-size: 11px; color: C.g600; line-height: 1.4; margin-bottom: 8;">{e.reason}</div>
+                    <div style="display: flex; align-items: center; gap: 8;">
+                      <button style="padding: 4px 12px; background: e.color; color: white; border: none; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">Act Now</button>
+                      <span style="font-size: 10px; color: C.g400; font-family: monospace;">{e.id}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Middle: Team Decisions Awaiting Review ──────────────── */}
+      <div style="background: white; border-radius: 16px; padding: 22px; box-shadow: 0 1px 6px rgba(0; border: #F1F5F9; margin-bottom: 20;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16;">
+          <div>
+            <div style="font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em;">Team Decisions Awaiting Review</div>
+            <div style="font-size: 12px; color: C.g400; margin-top: 2;">Decisions that need a reviewer assigned or are in active review</div>
+          </div>
+          <span style="font-size: 11px; font-weight: 700; color: C.teal; cursor: pointer;">View all →</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3; gap: 12;">
+          {awaitingReview.map((dec) => (
+            <div key={dec.id} style="padding: 14px 16px; border-radius: 10px; background: C.g50; border: #E2E8F0;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8;">
+                <span style="font-size: 10px; font-family: monospace; color: C.g400;">{dec.id}</span>
+                <span style="font-size: 10px; font-weight: 700; color: priorityCol(dec.priority); background: priorityBg(dec.priority); padding: 2px 7px; border-radius: 12px;">{dec.priority}</span>
+              </div>
+              <div style="font-size: 13px; font-weight: 600; color: C.g800; margin-bottom: 6; line-height: 1.35;">{dec.title}</div>
+              <div style="display: flex; align-items: center; gap: 6; margin-bottom: 10;">
+                <span style="font-size: 11px; color: #2563EB; background: #2563EB; padding: 2px 8px; border-radius: 10px; font-weight: 600;">{dec.dept}</span>
+                <span style="font-size: 11px; color: #64748B;">· {dec.submittedBy}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 11px; color: #64748B; font-weight: dec.reviewer === Unassigned ? 700 : 400;">
+                  {dec.reviewer === "Unassigned" ? "⚠ No reviewer" : dec.reviewer}
+                </span>
+                <SBadge s={dec.status} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Visualizations: Approval Progress + Team Workload ───── */}
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20; margin-bottom: 20;">
+
+        {/* Approval Progress */}
+        <div style="background: white; border-radius: 16px; padding: 22px; box-shadow: 0 1px 6px rgba(0; border: #F1F5F9;">
+          <div style="font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em; margin-bottom: 4;">Approval Progress</div>
+          <div style="font-size: 12px; color: C.g400; margin-bottom: 20;">Current pipeline status across all team decisions</div>
+          <div style="display: flex; flex-direction: column; gap: 14;">
+            {approvalStages.map((s) => (
+              <div key={s.label}>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6;">
+                  <span style="font-size: 13px; color: C.g600; font-weight: 500;">{s.label}</span>
+                  <span style="font-size: 13px; font-weight: 700; color: C.g800;">{s.count}</span>
+                </div>
+                <div style="height: 8px; background: #F1F5F9; border-radius: 4px; overflow: hidden;">
+                  <div style="width: `${s.pct}%`; height: 100%; background: s.color; border-radius: 4px; transition: width 0.4s;" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Team Workload */}
+        <div style="background: white; border-radius: 16px; padding: 22px; box-shadow: 0 1px 6px rgba(0; border: #F1F5F9;">
+          <div style="font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em; margin-bottom: 4;">Team Workload</div>
+          <div style="font-size: 12px; color: C.g400; margin-bottom: 20;">Active decisions assigned per team member</div>
+          <div style="display: flex; flex-direction: column; gap: 12;">
+            {workload.map((w) => (
+              <div key={w.name} style="display: flex; align-items: center; gap: 12;">
+                <div style="width: 30px; height: 30px; border-radius: 50%; background: `${w.color}20`; border: `2px solid ${w.color}40`; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: w.color; flex-shrink: 0;">{w.name.split(" ").map(n => n[0]).join("")}</div>
+                <span style="font-size: 13px; color: C.g700; width: 72px; flex-shrink: 0;">{w.name}</span>
+                <div style="flex: 1; height: 8px; background: #F1F5F9; border-radius: 4px; overflow: hidden;">
+                  <div style="width: `${(w.decisions / 6) * 100}%`; height: 100%; background: w.color; border-radius: 4px;" />
+                </div>
+                <span style="font-size: 13px; font-weight: 700; color: C.g800; width: 24px; text-align: right as const;">{w.decisions}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Recent Team Activities + Discussion Updates ──────────── */}
+      <div style="display: grid; grid-template-columns: 3fr 2fr; gap: 20; margin-bottom: 20;">
+
+        {/* Recent Team Activities Timeline */}
+        <div style="background: white; border-radius: 16px; padding: 22px; box-shadow: 0 1px 6px rgba(0; border: #F1F5F9;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18;">
+            <div>
+              <div style="font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em;">Recent Team Activities</div>
+              <div style="font-size: 12px; color: C.g400; margin-top: 2;">Live activity timeline from your team</div>
+            </div>
+            <span style="font-size: 11px; font-weight: 700; color: C.teal; cursor: pointer;">View all →</span>
+          </div>
+          <div style="position: relative; padding-left: 40;">
+            {teamActivities.map((activity, index) => {
+              const Icon = activity.icon;
+              const isLast = index === teamActivities.length - 1;
+              return (
+                <div key={activity.id} style="position: relative; padding-bottom: isLast ? 0 : 20;">
+                  {!isLast && <div style="position: absolute; left: -24; top: 36px; width: 2px; height: calc(100% - 12px); background: #F1F5F9;" />}
+                  <div style="position: absolute; left: -32; top: 0px; width: 30px; height: 30px; border-radius: 50%; background: `${activity.color}15`; border: `2px solid ${activity.color}40`; display: flex; align-items: center; justify-content: center;"><Icon size={13} color={activity.color} /></div>
+                  <div style="background: C.g50; border: #F1F5F9; border-radius: 10px; padding: 10px 14px;">
+                    <div style="font-size: 13px; color: C.g800; margin-bottom: 3;">
+                      <span style="font-weight: 700; color: C.teal;">{activity.user}</span>
+                      <span style="color: #64748B;"> {activity.action} </span>
+                      <span style="font-weight: 600; color: C.g700;">{activity.title}</span>
+                    </div>
+                    <div style="font-size: 11px; color: C.g400;">{activity.time}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Discussion Updates */}
+        <div style="background: white; border-radius: 16px; padding: 22px; box-shadow: 0 1px 6px rgba(0; border: #F1F5F9;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18;">
+            <div>
+              <div style="font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em;">Discussion Updates</div>
+              <div style="font-size: 12px; color: C.g400; margin-top: 2;">Active threads in your team</div>
+            </div>
+            <span style="font-size: 11px; font-weight: 700; color: C.teal; cursor: pointer;">View all →</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10;">
+            {discussions.map((d) => (
+              <div key={d.id} style="padding: 12px 14px; border-radius: 10px; background: C.g50; border: #F1F5F9; cursor: pointer;">
+                <div style="display: flex; gap: 10; align-items: flex-start;">
+                  <div style="width: 32px; height: 32px; border-radius: 9px; background: `${d.color}15`; border: `1.5px solid ${d.color}30`; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <MessageSquare size={14} color={d.color} />
+                  </div>
+                  <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 12px; font-weight: 600; color: C.g800; line-height: 1.35; margin-bottom: 6;">{d.title}</div>
+                    <div style="display: flex; align-items: center; gap: 10;">
+                      <div style="display: flex; align-items: center; gap: 4;"><MessageSquare size={10} color={C.g400} /><span style="font-size: 11px; color: #64748B;">{d.replies}</span></div>
+                      <div style="display: flex; align-items: center; gap: 4;"><Users size={10} color={C.g400} /><span style="font-size: 11px; color: #64748B;">{d.participants}</span></div>
+                      <div style="display: flex; align-items: center; gap: 4; margin-left: auto;"><Clock size={10} color={C.g400} /><span style="font-size: 10px; color: C.g400;">{d.lastActive}</span></div>
+                    </div>
+                  </div>
+                  {d.unread > 0 && <span style="width: 18px; height: 18px; background: C.teal; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: white; flex-shrink: 0;">{d.unread}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Team Decision Table ──────────────────────────────────── */}
+      <div style="background: white; border-radius: 16px; box-shadow: 0 1px 6px rgba(0; border: #F1F5F9; margin-bottom: 20;">
+        <div style="padding: 18px 22px; border-bottom: #F1F5F9; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em;">Team Decision Table</div>
+            <div style="font-size: 12px; color: C.g400; margin-top: 2;">All decisions submitted by your team</div>
+          </div>
+          <div style="display: flex; gap: 8;">
+            <div style="display: flex; align-items: center; gap: 6; background: C.g50; border: #E2E8F0; border-radius: 8px; padding: 7px 12px;">
+              <Filter size={13} color={C.g500} /><span style="font-size: 12px; color: C.g600;">Filter</span>
+            </div>
+            <button style="font-size: 12px; color: #2563EB; font-weight: 700; background: none; border: none; cursor: pointer;">View All →</button>
+          </div>
+        </div>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background: C.g50;">
+              {["Decision Title", "Department", "Submitted By", "Assigned Reviewer", "Priority", "Status", "Deadline", "Actions"].map(h => (
+                <th key={h} style="padding: 11px 16px; font-size: 10px; font-weight: 700; color: #64748B; text-align: left as const; text-transform: uppercase as const; letter-spacing: 0.06em; white-space: nowrap as const;">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {teamDecisions.map((dec) => (
+              <tr key={dec.id} style="border-top: #F1F5F9; cursor: pointer;">
+                <td style="padding: 13px 16px;">
+                  <div style="font-size: 13px; font-weight: 600; color: C.g800; margin-bottom: 2;">{dec.title}</div>
+                  <div style="font-size: 10px; color: C.g400; font-family: monospace;">{dec.id}</div>
+                </td>
+                <td style="padding: 13px 16px;">
+                  <span style="font-size: 11px; font-weight: 600; color: #2563EB; background: #2563EB; padding: 3px 9px; border-radius: 14px;">{dec.dept}</span>
+                </td>
+                <td style="padding: 13px 16px;">
+                  <div style="display: flex; align-items: center; gap: 7;">
+                    <div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg; display: flex; align-items: center; justify-content: center; font-size: 9px; color: white; font-weight: 700;">{dec.submittedBy.split(" ").map((n: string) => n[0]).join("")}</div>
+                    <span style="font-size: 12px; color: C.g600;">{dec.submittedBy}</span>
+                  </div>
+                </td>
+                <td style="padding: 13px 16px;">
+                  <span style="font-size: 12px; color: #EF4444; font-weight: dec.reviewer === Unassigned ? 700 : 400;">{dec.reviewer}</span>
+                </td>
+                <td style="padding: 13px 16px;">
+                  <span style="font-size: 11px; font-weight: 700; color: priorityCol(dec.priority); background: priorityBg(dec.priority); padding: 3px 9px; border-radius: 18px;">{dec.priority}</span>
+                </td>
+                <td style="padding: 13px 16px;"><SBadge s={dec.status} /></td>
+                <td style="padding: 13px 16px; font-size: 12px; color: #64748B; white-space: nowrap as const;">{dec.deadline}</td>
+                <td style="padding: 13px 16px;">
+                  <div style="display: flex; gap: 5;">
+                    <button style="padding: 4px 8px; border: #E2E8F0; border-radius: 6px; background: white; cursor: pointer;"><Eye size={13} color={C.g500} /></button>
+                    <button style="padding: 4px 8px; border: #E2E8F0; border-radius: 6px; background: white; cursor: pointer;"><UserCheck size={13} color={C.g500} /></button>
+                    <button style="padding: 4px 8px; border: #E2E8F0; border-radius: 6px; background: white; cursor: pointer;"><MoreHorizontal size={13} color={C.g500} /></button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* ── Quick Actions ────────────────────────────────────────── */}
+      <div style="background: white; border-radius: 16px; padding: 22px; box-shadow: 0 1px 6px rgba(0; border: #F1F5F9;">
+        <div style="font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: -0.01em; margin-bottom: 16;">Quick Actions</div>
+        <div style="display: grid; grid-template-columns: repeat(4; gap: 12;">
+          {([
+            [CheckSquare, "Approve Decision",    C.blue,   C.blueL],
+            [UserCheck,   "Assign Reviewer",     C.green,  C.greenL],
+            [MessageSquare,"Create Discussion",  C.purple, C.purpleL],
+            [BarChart2,   "Generate Team Report",C.indigo, C.indigoL],
+          ] as const).map(([Icon, label, col, bg]: any) => (
+            <button key={label} style="display: flex; flex-direction: column; align-items: center; gap: 10; padding: 18px 14px; border: #E2E8F0; border-radius: 12px; background: white; cursor: pointer; transition: all 0.15s;">
+              <div style="width: 44px; height: 44px; border-radius: 12px; background: bg; display: flex; align-items: center; justify-content: center;"><Icon size={20} color={col} /></div>
+              <span style="font-size: 13px; font-weight: 600; color: C.g800; text-align: center as const; line-height: 1.3;">{label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+    </ManagerAppLayout>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════
+// DECISION MANAGEMENT DASHBOARD

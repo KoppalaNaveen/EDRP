@@ -11,6 +11,7 @@ class UserRegister(BaseModel):
     password: str = Field(..., min_length=6)
     role_id: int
     team_id: int
+    employee_id: str
     designation: Optional[str] = None
     phone: Optional[str] = None
 
@@ -19,7 +20,7 @@ class UserRegister(BaseModel):
 # User Login
 # -----------------------------
 class UserLogin(BaseModel):
-    email: EmailStr
+    employee_id: str
     password: str
 
 
@@ -31,6 +32,7 @@ class Token(BaseModel):
     token_type: str
     user_id: int
     role_name: Optional[str] = None
+    full_name: Optional[str] = None
 
 # -----------------------------
 # User Response
@@ -38,7 +40,8 @@ class Token(BaseModel):
 class UserResponse(BaseModel):
     id: int
     full_name: str
-    email: EmailStr
+    email: str
+    employee_id: Optional[str]
     role_id: int
     team_id: int
     designation: Optional[str]
