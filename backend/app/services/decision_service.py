@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.schemas.decision import DecisionCreate, DecisionUpdate, DecisionStatusUpdate
+from app.schemas.decision import DecisionCreate, DecisionUpdate, DecisionStatusUpdate, DecisionFullCreate
 from app.repositories.decision_repository import DecisionRepository
 
 class DecisionService:
@@ -7,6 +7,10 @@ class DecisionService:
     @staticmethod
     def create_decision(db: Session, decision: DecisionCreate):
         return DecisionRepository.create_decision(db, decision)
+
+    @staticmethod
+    def create_decision_full(db: Session, full_decision: DecisionFullCreate):
+        return DecisionRepository.create_decision_full(db, full_decision)
 
     @staticmethod
     def get_all_decisions(db: Session):
@@ -19,6 +23,10 @@ class DecisionService:
     @staticmethod
     def update_decision(db: Session, decision_id: int, decision: DecisionUpdate):
         return DecisionRepository.update_decision(db, decision_id, decision)
+
+    @staticmethod
+    def update_decision_full(db: Session, decision_id: int, full_decision: DecisionFullCreate):
+        return DecisionRepository.update_decision_full(db, decision_id, full_decision)
 
     @staticmethod
     def update_status(db: Session, decision_id: int, status_update: DecisionStatusUpdate):

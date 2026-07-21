@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block css %}
+<style>
+.alt-card {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    transition: box-shadow 0.2s, transform 0.15s;
+    height: 100%;
+}
+.alt-card:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+}
+.feasibility-bar { height: 6px; border-radius: 3px; background: #E2E8F0; overflow: hidden; }
+.feasibility-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #2563EB, #818CF8); }
+.risk-pill {
+    font-size: 11px; font-weight: 700;
+    padding: 2px 10px; border-radius: 20px;
+    display: inline-block;
+}
+.risk-low    { background: #ECFDF5; color: #059669; }
+.risk-medium { background: #FFF7ED; color: #D97706; }
+.risk-high   { background: #FEF2F2; color: #DC2626; }
+.risk-unknown { background: #F1F5F9; color: #64748B; }
+.cost-badge {
+    font-size: 12px; font-weight: 700; color: #0F172A;
+    background: #F8FAFC; border: 1px solid #E2E8F0;
+    padding: 2px 10px; border-radius: 8px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">Alternatives Analysis</h2>
+        <p class="text-muted mb-0">Explore all recorded alternatives across decisions with cost, risk, and feasibility data.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <div class="input-group" style="width:240px;">
+            <span class="input-group-text bg-white border-end-0">
+                <i data-lucide="search" style="width:15px;height:15px;color:#94a3b8;"></i>
+            </span>
+            <input type="text" id="altSearch" class="form-control border-start-0 ps-0" placeholder="Search alternatives..." oninput="filterAlts()">
+        </div>
+        <select id="riskFilter" class="form-select" style="width:150px;" onchange="filterAlts()">
+            <option value="">All Risks</option>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+        </select>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-3 p-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:40px;height:40px;border-radius:10px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;">
+                    <i data-lucide="git-branch" style="width:18px;height:18px;color:#4F46E5;"></i>
+                </div>
+                <div><div id="altStatTotal" class="fw-bold fs-5 lh-1">—</div><div class="text-muted" style="font-size:11px;">Total Alternatives</div></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-3 p-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:40px;height:40px;border-radius:10px;background:#ECFDF5;display:flex;align-items:center;justify-content:center;">
+                    <i data-lucide="check-circle" style="width:18px;height:18px;color:#059669;"></i>
+                </div>
+                <div><div id="altStatLow" class="fw-bold fs-5 lh-1">—</div><div class="text-muted" style="font-size:11px;">Low Risk</div></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-3 p-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:40px;height:40px;border-radius:10px;background:#FFF7ED;display:flex;align-items:center;justify-content:center;">
+                    <i data-lucide="alert-triangle" style="width:18px;height:18px;color:#D97706;"></i>
+                </div>
+                <div><div id="altStatMedium" class="fw-bold fs-5 lh-1">—</div><div class="text-muted" style="font-size:11px;">Medium Risk</div></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-3 p-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:40px;height:40px;border-radius:10px;background:#FEF2F2;display:flex;align-items:center;justify-content:center;">
+                    <i data-lucide="x-octagon" style="width:18px;height:18px;color:#DC2626;"></i>
+                </div>
+                <div><div id="altStatHigh" class="fw-bold fs-5 lh-1">—</div><div class="text-muted" style="font-size:11px;">High Risk</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View toggle -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <span id="altPaginationInfo" class="text-muted small">Loading...</span>
+    <div class="btn-group btn-group-sm">
+        <button id="viewGrid" class="btn btn-primary px-3" onclick="setView('grid')">
+            <i data-lucide="grid" style="width:14px;height:14px;"></i>
+        </button>
+        <button id="viewTable" class="btn btn-outline-secondary px-3" onclick="setView('table')">
+            <i data-lucide="list" style="width:14px;height:14px;"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Cards Grid View -->
+<div id="altGridView" class="row g-3">
+    <div class="col-12 text-center py-5 text-muted">
+        <div class="spinner-border spinner-border-sm me-2"></div>Loading alternatives...
+    </div>
+</div>
+
+<!-- Table View (hidden by default) -->
+<div id="altTableView" class="card border-0 shadow-sm d-none" style="border-radius:12px;overflow:hidden;">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" style="font-size:0.875rem;">
+            <thead class="table-light text-secondary" style="font-size:0.72rem;text-transform:uppercase;">
+                <tr>
+                    <th class="px-4 py-3 border-bottom-0">Alternative</th>
+                    <th class="px-4 py-3 border-bottom-0">Decision</th>
+                    <th class="px-4 py-3 border-bottom-0">Cost</th>
+                    <th class="px-4 py-3 border-bottom-0">Risk</th>
+                    <th class="px-4 py-3 border-bottom-0">Feasibility</th>
+                    <th class="px-4 py-3 border-bottom-0 text-end">Action</th>
+                </tr>
+            </thead>
+            <tbody id="altTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination -->
+<div class="d-flex justify-content-end gap-2 mt-4">
+    <button class="btn btn-sm btn-outline-secondary px-3" id="altBtnPrev" onclick="prevPage()" disabled>Previous</button>
+    <button class="btn btn-sm btn-outline-secondary px-3" id="altBtnNext" onclick="nextPage()" disabled>Next</button>
+</div>
+
+<script>
+    const API_URL = "http://127.0.0.1:8000";
+</script>
+<script src="{{ url_for('static', filename='js/alternatives.js') }}"></script>
+{% endblock %}

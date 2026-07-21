@@ -2,73 +2,88 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold">Decision Management</h2>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#decisionModal" onclick="openCreateModal()">
-        <i class="bi bi-plus-circle me-1"></i> New Decision
-    </button>
+    <div>
+        <h2 class="fw-bold text-dark mb-1">My Decisions</h2>
+        <p class="text-muted mb-0">Manage and track all your decision records.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-light border shadow-sm text-secondary d-flex align-items-center">
+            <i data-lucide="filter" style="width: 16px; height: 16px;" class="me-2"></i> Filter
+        </button>
+        <button class="btn btn-light border shadow-sm text-secondary d-flex align-items-center">
+            <i data-lucide="calendar" style="width: 16px; height: 16px;" class="me-2"></i> Date Range
+        </button>
+        <a href="{{ url_for('create_decision') }}" class="btn btn-primary shadow-sm d-flex align-items-center text-decoration-none">
+            <i data-lucide="plus" style="width: 16px; height: 16px;" class="me-1"></i> New Decision
+        </a>>
+    </div>
 </div>
 
-<div class="card shadow">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-        <h5 class="mb-0 text-primary fw-bold">All Decisions</h5>
-        <div class="input-group w-25">
-            <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
-            <input type="text" id="searchInput" class="form-control" placeholder="Search decisions...">
-        </div>
-    </div>
-    <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-            <thead class="table-light">
+<!-- Tabs -->
+<ul class="nav nav-tabs mb-4 border-bottom-0" id="decisionTabs" role="tablist" style="gap: 1rem;">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active fw-bold px-0 pb-3 border-0 border-bottom border-primary border-3 bg-transparent text-primary" style="border-radius: 0;" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" onclick="setFilter('All', this)">
+        All <span id="count-all" class="badge bg-primary bg-opacity-10 text-primary rounded-pill ms-1">0</span>
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link fw-medium px-0 pb-3 border-0 bg-transparent text-secondary" id="draft-tab" data-bs-toggle="tab" data-bs-target="#draft" type="button" role="tab" onclick="setFilter('Draft', this)">
+        Draft <span id="count-draft" class="badge bg-light text-secondary rounded-pill ms-1">0</span>
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link fw-medium px-0 pb-3 border-0 bg-transparent text-secondary" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" onclick="setFilter('Pending', this)">
+        Pending <span id="count-pending" class="badge bg-light text-secondary rounded-pill ms-1">0</span>
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link fw-medium px-0 pb-3 border-0 bg-transparent text-secondary" id="review-tab" data-bs-toggle="tab" data-bs-target="#review" type="button" role="tab" onclick="setFilter('In Review', this)">
+        Review <span id="count-review" class="badge bg-light text-secondary rounded-pill ms-1">0</span>
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link fw-medium px-0 pb-3 border-0 bg-transparent text-secondary" id="approved-tab" data-bs-toggle="tab" data-bs-target="#approved" type="button" role="tab" onclick="setFilter('Approved', this)">
+        Approved <span id="count-approved" class="badge bg-light text-secondary rounded-pill ms-1">0</span>
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link fw-medium px-0 pb-3 border-0 bg-transparent text-secondary" id="rejected-tab" data-bs-toggle="tab" data-bs-target="#rejected" type="button" role="tab" onclick="setFilter('Rejected', this)">
+        Rejected <span id="count-rejected" class="badge bg-light text-secondary rounded-pill ms-1">0</span>
+    </button>
+  </li>
+</ul>
+
+<!-- Table -->
+<div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" style="font-size: 0.9rem;">
+            <thead class="table-light text-secondary" style="font-size: 0.75rem; text-transform: uppercase;">
                 <tr>
-                    <th class="ps-4">ID</th>
-                    <th>Title</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th class="text-end pe-4">Actions</th>
+                    <th class="px-4 py-3 border-bottom-0">ID / Name</th>
+                    <th class="px-4 py-3 border-bottom-0">Category</th>
+                    <th class="px-4 py-3 border-bottom-0">Owner</th>
+                    <th class="px-4 py-3 border-bottom-0">Date</th>
+                    <th class="px-4 py-3 border-bottom-0">Status</th>
+                    <th class="px-4 py-3 border-bottom-0 text-end"></th>
                 </tr>
             </thead>
-            <tbody id="decisionsTableBody">
-                <!-- Data populated by JS -->
+            <tbody id="decisionsTableBody" class="border-top-0">
+                <!-- Data populated by JS, will be formatted beautifully by script.js -->
             </tbody>
         </table>
     </div>
-    <div class="card-footer bg-white py-3">
+    <div class="card-footer bg-white border-top-0 py-3 px-4">
         <div class="d-flex justify-content-between align-items-center">
             <span id="paginationInfo" class="text-muted small">Showing 0 of 0</span>
             <div class="btn-group">
-                <button class="btn btn-sm btn-outline-secondary" id="btnPrev" onclick="prevPage()">Previous</button>
-                <button class="btn btn-sm btn-outline-secondary" id="btnNext" onclick="nextPage()">Next</button>
+                <button class="btn btn-sm btn-outline-secondary px-3" id="btnPrev" onclick="prevPage()">Previous</button>
+                <button class="btn btn-sm btn-outline-secondary px-3" id="btnNext" onclick="nextPage()">Next</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Add/Edit Modal -->
-<div class="modal fade" id="decisionModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title fw-bold" id="modalTitle">Create Decision</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4">
-                <input type="hidden" id="decisionId">
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Title</label>
-                    <input type="text" id="decisionTitle" class="form-control" placeholder="Enter decision title">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Description</label>
-                    <textarea id="decisionDescription" class="form-control" rows="4" placeholder="Detail the context and background..."></textarea>
-                </div>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="saveDecision()">Save Decision</button>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <script>
     const API_URL = "http://127.0.0.1:8000";

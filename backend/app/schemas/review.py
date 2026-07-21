@@ -14,6 +14,8 @@ class ReviewResponse(BaseModel):
     id: int
     decision_id: int
     reviewer_id: int
+    reviewer_name: Optional[str] = None
+    reviewer_initials: Optional[str] = None
     status: str
     comments: Optional[str]
     reviewed_at: datetime

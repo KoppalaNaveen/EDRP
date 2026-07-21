@@ -462,7 +462,7 @@
         <ul class="nav-links">
             <li><a href="{{ url_for('dashboard') }}" class="nav-item active"><i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i> Dashboard</a></li>
             <li><a href="{{ url_for('decisions') }}" class="nav-item"><i data-lucide="file-text" style="width: 18px; height: 18px;"></i> Team Decisions</a></li>
-            <li><a href="{{ url_for('reviews') }}" class="nav-item"><i data-lucide="check-square" style="width: 18px; height: 18px;"></i> Pending Approvals <span class="nav-badge">7</span></a></li>
+            <li><a href="{{ url_for('reviews') }}" class="nav-item"><i data-lucide="check-square" style="width: 18px; height: 18px;"></i> Pending Approvals {% if pending_reviews > 0 %}<span class="nav-badge">{{ pending_reviews }}</span>{% endif %}</a></li>
             <li><a href="#" class="nav-item"><i data-lucide="message-square" style="width: 18px; height: 18px;"></i> Discussions Module</a></li>
             <li><a href="{{ url_for('repository') }}" class="nav-item"><i data-lucide="database" style="width: 18px; height: 18px;"></i> Knowledge Repository</a></li>
             <li><a href="{{ url_for('reports') }}" class="nav-item"><i data-lucide="bar-chart-2" style="width: 18px; height: 18px;"></i> Reports</a></li>
@@ -523,16 +523,16 @@
                         <div class="stat-icon" style="background: #EFF6FF; color: #2563EB;"><i data-lucide="bar-chart-2" style="width: 20px; height: 20px;"></i></div>
                         <i data-lucide="arrow-right" style="width: 16px; height: 16px; color: #CBD5E1;"></i>
                     </div>
-                    <div class="stat-value">{{ total_decisions|default('31') }}</div>
+                    <div class="stat-value">{{ total_decisions }}</div>
                     <div class="stat-label">Team Decisions</div>
-                    <div class="stat-desc">+3 this week</div>
+                    <div class="stat-desc">Total active</div>
                 </div>
                 <div class="stat-card">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="stat-icon" style="background: #FFFBEB; color: #F59E0B;"><i data-lucide="check-square" style="width: 20px; height: 20px;"></i></div>
                         <i data-lucide="arrow-right" style="width: 16px; height: 16px; color: #CBD5E1;"></i>
                     </div>
-                    <div class="stat-value">{{ pending_reviews|default('7') }}</div>
+                    <div class="stat-value">{{ pending_reviews }}</div>
                     <div class="stat-label">Pending Approvals</div>
                     <div class="stat-desc">Requires action</div>
                 </div>
@@ -541,18 +541,18 @@
                         <div class="stat-icon" style="background: #F5F3FF; color: #8B5CF6;"><i data-lucide="message-square" style="width: 20px; height: 20px;"></i></div>
                         <i data-lucide="arrow-right" style="width: 16px; height: 16px; color: #CBD5E1;"></i>
                     </div>
-                    <div class="stat-value">14</div>
-                    <div class="stat-label">Active Discussions</div>
-                    <div class="stat-desc">Ongoing threads</div>
+                    <div class="stat-value">{{ draft_decisions }}</div>
+                    <div class="stat-label">Draft Decisions</div>
+                    <div class="stat-desc">In progress</div>
                 </div>
                 <div class="stat-card">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="stat-icon bg-teal-light"><i data-lucide="users" style="width: 20px; height: 20px;"></i></div>
                         <i data-lucide="arrow-right" style="width: 16px; height: 16px; color: #CBD5E1;"></i>
                     </div>
-                    <div class="stat-value">12</div>
-                    <div class="stat-label">Team Members</div>
-                    <div class="stat-desc">In your team</div>
+                    <div class="stat-value">{{ approved_decisions }}</div>
+                    <div class="stat-label">Approved Decisions</div>
+                    <div class="stat-desc">This month</div>
                 </div>
             </div>
 
@@ -568,70 +568,36 @@
                         <a href="#" style="font-size: 12px; font-weight: 700; color: #2563EB; text-decoration: none;">View All <i data-lucide="chevron-right" style="width: 14px; height: 14px;"></i></a>
                     </div>
                     <div>
-                        <!-- Queue Item 1 -->
-                        <div class="queue-item">
-                            <div class="queue-icon" style="background: #EFF6FF; color: #2563EB;"><i data-lucide="file-text" style="width: 20px; height: 20px;"></i></div>
-                            <div style="flex: 1;">
-                                <div class="queue-title">Cloud Infrastructure Migration Strategy</div>
-                                <div class="queue-meta">
-                                    <span>J. Doe</span> • <span>Technology</span> • <span style="color: #F59E0B; font-weight: 600;">Waiting 2 days</span>
+                        {% if recent_reviews %}
+                            {% for review in recent_reviews %}
+                            <div class="queue-item" {% if loop.last %}style="margin-bottom: 0;"{% endif %}>
+                                <div class="queue-icon" style="background: #EFF6FF; color: #2563EB;"><i data-lucide="file-text" style="width: 20px; height: 20px;"></i></div>
+                                <div style="flex: 1;">
+                                    <div class="queue-title">{{ review.decision_title }}</div>
+                                    <div class="queue-meta">
+                                        <span>{{ review.requester_name or 'Unknown' }}</span> • <span>{{ review.category_name or 'Uncategorized' }}</span> • <span style="color: #F59E0B; font-weight: 600;">{{ review.time_ago }}</span>
+                                    </div>
+                                </div>
+                                {% if review.priority == 'Critical' %}
+                                <span style="font-size: 10px; font-weight: 700; color: #EF4444; background: #FEF2F2; padding: 2px 8px; border-radius: 6px; margin-right: 16px;">Critical</span>
+                                {% elif review.priority == 'High' %}
+                                <span style="font-size: 10px; font-weight: 700; color: #F59E0B; background: #FFFBEB; padding: 2px 8px; border-radius: 6px; margin-right: 16px;">High</span>
+                                {% else %}
+                                <span style="font-size: 10px; font-weight: 700; color: #2563EB; background: #EFF6FF; padding: 2px 8px; border-radius: 6px; margin-right: 16px;">{{ review.priority }}</span>
+                                {% endif %}
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn-review" onclick="window.location.href='{{ url_for('decision_detail', decision_id=review.decision_id) }}'">Review</button>
                                 </div>
                             </div>
-                            <span style="font-size: 10px; font-weight: 700; color: #F59E0B; background: #FFFBEB; padding: 2px 8px; border-radius: 6px; margin-right: 16px;">High</span>
-                            <div style="display: flex; gap: 8px;">
-                                <button class="btn-approve">Approve</button>
-                                <button class="btn-review">Review</button>
-                            </div>
-                        </div>
-                        <!-- Queue Item 2 -->
-                        <div class="queue-item">
-                            <div class="queue-icon" style="background: #FEF2F2; color: #EF4444;"><i data-lucide="shield" style="width: 20px; height: 20px;"></i></div>
-                            <div style="flex: 1;">
-                                <div class="queue-title">Security Compliance Framework Update</div>
-                                <div class="queue-meta">
-                                    <span>R. Patel</span> • <span>Security</span> • <span style="color: #EF4444; font-weight: 600;">Waiting 1 day</span>
-                                </div>
-                            </div>
-                            <span style="font-size: 10px; font-weight: 700; color: #EF4444; background: #FEF2F2; padding: 2px 8px; border-radius: 6px; margin-right: 16px;">Critical</span>
-                            <div style="display: flex; gap: 8px;">
-                                <button class="btn-approve">Approve</button>
-                                <button class="btn-review">Review</button>
-                            </div>
-                        </div>
-                        <!-- Queue Item 3 -->
-                        <div class="queue-item">
-                            <div class="queue-icon" style="background: #FFFBEB; color: #F59E0B;"><i data-lucide="file-text" style="width: 20px; height: 20px;"></i></div>
-                            <div style="flex: 1;">
-                                <div class="queue-title">Remote Work Policy Revision Q1 2026</div>
-                                <div class="queue-meta">
-                                    <span>S. Chen</span> • <span>HR Policy</span> • <span style="color: #F59E0B; font-weight: 600;">Waiting 5 hours</span>
-                                </div>
-                            </div>
-                            <span style="font-size: 10px; font-weight: 700; color: #2563EB; background: #EFF6FF; padding: 2px 8px; border-radius: 6px; margin-right: 16px;">Medium</span>
-                            <div style="display: flex; gap: 8px;">
-                                <button class="btn-approve">Approve</button>
-                                <button class="btn-review">Review</button>
-                            </div>
-                        </div>
-                        <!-- Queue Item 4 -->
-                        <div class="queue-item" style="margin-bottom: 0;">
-                            <div class="queue-icon" style="background: #F5F3FF; color: #8B5CF6;"><i data-lucide="bar-chart" style="width: 20px; height: 20px;"></i></div>
-                            <div style="flex: 1;">
-                                <div class="queue-title">Q2 Marketing Budget Proposal</div>
-                                <div class="queue-meta">
-                                    <span>R. Kim</span> • <span>Marketing</span> • <span style="color: #F59E0B; font-weight: 600;">Waiting 6 hours</span>
-                                </div>
-                            </div>
-                            <span style="font-size: 10px; font-weight: 700; color: #2563EB; background: #EFF6FF; padding: 2px 8px; border-radius: 6px; margin-right: 16px;">Medium</span>
-                            <div style="display: flex; gap: 8px;">
-                                <button class="btn-approve">Approve</button>
-                                <button class="btn-review">Review</button>
-                            </div>
-                        </div>
+                            {% endfor %}
+                        {% else %}
+                            <div style="font-size: 13px; color: #94A3B8; padding: 12px; text-align: center;">No pending approvals</div>
+                        {% endif %}
                     </div>
                 </div>
 
                 <!-- Escalated Decisions -->
+                {% if escalated_decisions %}
                 <div class="section-card">
                     <div class="section-header">
                         <div>
@@ -679,6 +645,7 @@
                         </div>
                     </div>
                 </div>
+                {% endif %}
             </div>
 
             <!-- ROW 2: Team Decisions Awaiting Review -->
@@ -691,44 +658,42 @@
                     <a href="#" style="font-size: 12px; font-weight: 700; color: #14B8A6; text-decoration: none;">View All <i data-lucide="chevron-right" style="width: 14px; height: 14px;"></i></a>
                 </div>
                 <div class="grid-half" style="margin-bottom: 0;">
-                    <!-- Card 1 -->
-                    <div style="border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px; background: #F8FAFC;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <span style="font-size: 10px; color: #94A3B8; font-family: monospace;">DEC-1033</span>
-                            <span style="font-size: 10px; font-weight: 700; color: #2563EB; background: #EFF6FF; padding: 2px 8px; border-radius: 6px;">Medium</span>
-                        </div>
-                        <div style="font-size: 14px; font-weight: 700; color: #1E293B; margin-bottom: 12px;">Remote Work Policy Revision Q1 2026</div>
-                        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-                            <span style="font-size: 11px; font-weight: 600; color: #2563EB; background: #EFF6FF; padding: 2px 8px; border-radius: 12px;">HR Policy</span>
-                            <span style="font-size: 11px; color: #64748B;">S. Chen</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E2E8F0; padding-top: 12px;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <div style="width: 24px; height: 24px; border-radius: 50%; background: #E0E7FF; color: #4338CA; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700;">MJ</div>
-                                <span style="font-size: 12px; color: #475569;">M. Johnson</span>
+                    {% if recent_decisions %}
+                        {% for decision in recent_decisions if decision.status in ['Pending', 'In Review'] %}
+                        <div style="border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px; background: #F8FAFC;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="font-size: 10px; color: #94A3B8; font-family: monospace;">DEC-{{ decision.id }}</span>
+                                {% if decision.priority == 'High' or decision.priority == 'Critical' %}
+                                <span style="font-size: 10px; font-weight: 700; color: #F59E0B; background: #FFFBEB; padding: 2px 8px; border-radius: 6px;">{{ decision.priority }}</span>
+                                {% else %}
+                                <span style="font-size: 10px; font-weight: 700; color: #2563EB; background: #EFF6FF; padding: 2px 8px; border-radius: 6px;">{{ decision.priority }}</span>
+                                {% endif %}
                             </div>
-                            <span style="font-size: 11px; font-weight: 700; color: #64748B; background: #F1F5F9; padding: 4px 10px; border-radius: 6px;">In Review</span>
-                        </div>
-                    </div>
-                    <!-- Card 2 -->
-                    <div style="border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px; background: #F8FAFC;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <span style="font-size: 10px; color: #94A3B8; font-family: monospace;">DEC-1102</span>
-                            <span style="font-size: 10px; font-weight: 700; color: #F59E0B; background: #FFFBEB; padding: 2px 8px; border-radius: 6px;">High</span>
-                        </div>
-                        <div style="font-size: 14px; font-weight: 700; color: #1E293B; margin-bottom: 12px;">Q1 Budget Allocation — Engineering</div>
-                        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-                            <span style="font-size: 11px; font-weight: 600; color: #4F46E5; background: #EEF2FF; padding: 2px 8px; border-radius: 12px;">Finance</span>
-                            <span style="font-size: 11px; color: #64748B;">L. Park</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E2E8F0; padding-top: 12px;">
-                            <div style="display: flex; align-items: center; gap: 6px; color: #EF4444;">
-                                <i data-lucide="alert-circle" style="width: 14px; height: 14px;"></i>
-                                <span style="font-size: 12px; font-weight: 600;">No reviewer</span>
+                            <div style="font-size: 14px; font-weight: 700; color: #1E293B; margin-bottom: 12px;">{{ decision.title }}</div>
+                            <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                                <span style="font-size: 11px; font-weight: 600; color: #4F46E5; background: #EEF2FF; padding: 2px 8px; border-radius: 12px;">{{ decision.category_name }}</span>
+                                <span style="font-size: 11px; color: #64748B;">{{ decision.requester_name }}</span>
                             </div>
-                            <button style="font-size: 11px; font-weight: 700; color: #1E293B; background: #E2E8F0; padding: 4px 10px; border: none; border-radius: 6px; cursor: pointer;">Assign</button>
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E2E8F0; padding-top: 12px;">
+                                {% if decision.reviewer_name %}
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 24px; height: 24px; border-radius: 50%; background: #E0E7FF; color: #4338CA; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700;">{{ decision.reviewer_name[:2].upper() }}</div>
+                                    <span style="font-size: 12px; color: #475569;">{{ decision.reviewer_name }}</span>
+                                </div>
+                                <span style="font-size: 11px; font-weight: 700; color: #64748B; background: #F1F5F9; padding: 4px 10px; border-radius: 6px;">{{ decision.status }}</span>
+                                {% else %}
+                                <div style="display: flex; align-items: center; gap: 6px; color: #EF4444;">
+                                    <i data-lucide="alert-circle" style="width: 14px; height: 14px;"></i>
+                                    <span style="font-size: 12px; font-weight: 600;">No reviewer</span>
+                                </div>
+                                <button style="font-size: 11px; font-weight: 700; color: #1E293B; background: #E2E8F0; padding: 4px 10px; border: none; border-radius: 6px; cursor: pointer;">Assign</button>
+                                {% endif %}
+                            </div>
                         </div>
-                    </div>
+                        {% endfor %}
+                    {% else %}
+                        <div style="grid-column: 1 / -1; font-size: 13px; color: #94A3B8; padding: 12px; text-align: center;">No team decisions awaiting review</div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -743,38 +708,24 @@
                         </div>
                     </div>
                     <div>
-                        <div class="progress-bar-container">
-                            <div class="progress-header">
-                                <span style="color: #475569; font-weight: 500;">Submitted</span>
-                                <span style="font-weight: 700; color: #1E293B;">31</span>
+                        {% if approval_flow %}
+                            {% for flow in approval_flow %}
+                            <div class="progress-bar-container">
+                                <div class="progress-header">
+                                    <span style="color: #475569; font-weight: 500;">{{ flow.label }}</span>
+                                    <span style="font-weight: 700; color: #1E293B;">{{ flow.count }}</span>
+                                </div>
+                                <div class="progress-track"><div class="progress-fill" style="width: {{ flow.percentage }}%; background: {{ flow.color }};"></div></div>
                             </div>
-                            <div class="progress-track"><div class="progress-fill" style="width: 100%; background: #94A3B8;"></div></div>
-                        </div>
-                        <div class="progress-bar-container">
-                            <div class="progress-header">
-                                <span style="color: #475569; font-weight: 500;">In Review</span>
-                                <span style="font-weight: 700; color: #1E293B;">18</span>
-                            </div>
-                            <div class="progress-track"><div class="progress-fill" style="width: 58%; background: #14B8A6;"></div></div>
-                        </div>
-                        <div class="progress-bar-container">
-                            <div class="progress-header">
-                                <span style="color: #475569; font-weight: 500;">Approved</span>
-                                <span style="font-weight: 700; color: #1E293B;">11</span>
-                            </div>
-                            <div class="progress-track"><div class="progress-fill" style="width: 35%; background: #14B8A6;"></div></div>
-                        </div>
-                        <div class="progress-bar-container">
-                            <div class="progress-header">
-                                <span style="color: #475569; font-weight: 500;">Pending You</span>
-                                <span style="font-weight: 700; color: #1E293B;">7</span>
-                            </div>
-                            <div class="progress-track"><div class="progress-fill" style="width: 22%; background: #F59E0B;"></div></div>
-                        </div>
+                            {% endfor %}
+                        {% else %}
+                            <div style="font-size: 13px; color: #94A3B8; padding: 12px; text-align: center;">No progress data available</div>
+                        {% endif %}
                     </div>
                 </div>
 
-                <!-- Team Workload -->
+                <!-- Team Workload (Hidden until backend supports it) -->
+                {% if team_workload %}
                 <div class="section-card">
                     <div class="section-header" style="margin-bottom: 24px;">
                         <div>
@@ -825,6 +776,7 @@
                         </div>
                     </div>
                 </div>
+                {% endif %}
             </div>
 
             <!-- ROW 4: Team Activities & Discussion Updates -->
@@ -975,130 +927,66 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Row 1 -->
-                            <tr>
-                                <td>
-                                    <div style="font-size: 13px; font-weight: 600; color: #1E293B; margin-bottom: 2px;">Cloud Infrastructure Migration Strategy</div>
-                                    <div style="font-size: 11px; color: #94A3B8; font-family: monospace;">DEC-1024</div>
-                                </td>
-                                <td><span style="font-size: 11px; font-weight: 600; color: #2563EB; background: #EFF6FF; padding: 2px 8px; border-radius: 12px;">Technology</span></td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <div style="width: 24px; height: 24px; border-radius: 50%; background: #2563EB; color: white; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;">JD</div>
-                                        <span style="font-size: 12px; color: #334155;">J. Doe</span>
-                                    </div>
-                                </td>
-                                <td><span style="font-size: 12px; color: #334155;">Dr. A. Chen</span></td>
-                                <td><span style="font-size: 11px; font-weight: 700; color: #F59E0B; background: #FFFBEB; padding: 2px 8px; border-radius: 6px;">High</span></td>
-                                <td><span class="badge-status" style="background: #FFFBEB; color: #F59E0B;">Pending</span></td>
-                                <td><span style="font-size: 12px; color: #64748B;">Jan 15, 2026</span></td>
-                                <td>
-                                    <div style="display: flex; gap: 4px;">
-                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="eye" style="width: 14px; height: 14px;"></i></button>
-                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="more-horizontal" style="width: 14px; height: 14px;"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-                            
-                            <!-- Row 2 -->
-                            <tr>
-                                <td>
-                                    <div style="font-size: 13px; font-weight: 600; color: #1E293B; margin-bottom: 2px;">Remote Work Policy Revision Q1 2026</div>
-                                    <div style="font-size: 11px; color: #94A3B8; font-family: monospace;">DEC-1033</div>
-                                </td>
-                                <td><span style="font-size: 11px; font-weight: 600; color: #2563EB; background: #EFF6FF; padding: 2px 8px; border-radius: 12px;">HR Policy</span></td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <div style="width: 24px; height: 24px; border-radius: 50%; background: #14B8A6; color: white; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;">SC</div>
-                                        <span style="font-size: 12px; color: #334155;">S. Chen</span>
-                                    </div>
-                                </td>
-                                <td><span style="font-size: 12px; color: #334155;">M. Johnson</span></td>
-                                <td><span style="font-size: 11px; font-weight: 700; color: #2563EB; background: #EFF6FF; padding: 2px 8px; border-radius: 6px;">Medium</span></td>
-                                <td><span class="badge-status" style="background: #F5F3FF; color: #8B5CF6;">Review</span></td>
-                                <td><span style="font-size: 12px; color: #64748B;">Jan 18, 2026</span></td>
-                                <td>
-                                    <div style="display: flex; gap: 4px;">
-                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="eye" style="width: 14px; height: 14px;"></i></button>
-                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="more-horizontal" style="width: 14px; height: 14px;"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <!-- Row 3 -->
-                            <tr>
-                                <td>
-                                    <div style="font-size: 13px; font-weight: 600; color: #1E293B; margin-bottom: 2px;">Q1 Budget Allocation — Engineering</div>
-                                    <div style="font-size: 11px; color: #94A3B8; font-family: monospace;">DEC-1102</div>
-                                </td>
-                                <td><span style="font-size: 11px; font-weight: 600; color: #4F46E5; background: #EEF2FF; padding: 2px 8px; border-radius: 12px;">Finance</span></td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <div style="width: 24px; height: 24px; border-radius: 50%; background: #4F46E5; color: white; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;">LP</div>
-                                        <span style="font-size: 12px; color: #334155;">L. Park</span>
-                                    </div>
-                                </td>
-                                <td><span style="font-size: 12px; font-weight: 700; color: #EF4444;">Unassigned</span></td>
-                                <td><span style="font-size: 11px; font-weight: 700; color: #F59E0B; background: #FFFBEB; padding: 2px 8px; border-radius: 6px;">High</span></td>
-                                <td><span class="badge-status" style="background: #F1F5F9; color: #64748B;">Draft</span></td>
-                                <td><span style="font-size: 12px; color: #64748B;">Jan 20, 2026</span></td>
-                                <td>
-                                    <div style="display: flex; gap: 4px;">
-                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="eye" style="width: 14px; height: 14px;"></i></button>
-                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="more-horizontal" style="width: 14px; height: 14px;"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-                            
-                            <!-- Row 4 -->
-                            <tr>
-                                <td>
-                                    <div style="font-size: 13px; font-weight: 600; color: #1E293B; margin-bottom: 2px;">New Vendor Onboarding Process</div>
-                                    <div style="font-size: 11px; color: #94A3B8; font-family: monospace;">DEC-2014</div>
-                                </td>
-                                <td><span style="font-size: 11px; font-weight: 600; color: #8B5CF6; background: #F5F3FF; padding: 2px 8px; border-radius: 12px;">Procurement</span></td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <div style="width: 24px; height: 24px; border-radius: 50%; background: #0EA5E9; color: white; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;">YW</div>
-                                        <span style="font-size: 12px; color: #334155;">Y. Wright</span>
-                                    </div>
-                                </td>
-                                <td><span style="font-size: 12px; color: #334155;">S. Chen</span></td>
-                                <td><span style="font-size: 11px; font-weight: 700; color: #64748B; background: #F1F5F9; padding: 2px 8px; border-radius: 6px;">Low</span></td>
-                                <td><span class="badge-status" style="background: #ECFDF5; color: #10B981;">Approved</span></td>
-                                <td><span style="font-size: 12px; color: #64748B;">Jan 25, 2026</span></td>
-                                <td>
-                                    <div style="display: flex; gap: 4px;">
-                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="eye" style="width: 14px; height: 14px;"></i></button>
-                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="more-horizontal" style="width: 14px; height: 14px;"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-                            
-                            <!-- Row 5 -->
-                            <tr>
-                                <td>
-                                    <div style="font-size: 13px; font-weight: 600; color: #1E293B; margin-bottom: 2px;">Security Compliance Framework Update</div>
-                                    <div style="font-size: 11px; color: #94A3B8; font-family: monospace;">DEC-3135</div>
-                                </td>
-                                <td><span style="font-size: 11px; font-weight: 600; color: #2563EB; background: #EFF6FF; padding: 2px 8px; border-radius: 12px;">Security</span></td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <div style="width: 24px; height: 24px; border-radius: 50%; background: #8B5CF6; color: white; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;">RP</div>
-                                        <span style="font-size: 12px; color: #334155;">R. Patel</span>
-                                    </div>
-                                </td>
-                                <td><span style="font-size: 12px; color: #334155;">Dr. M. Lee</span></td>
-                                <td><span style="font-size: 11px; font-weight: 700; color: #EF4444; background: #FEF2F2; padding: 2px 8px; border-radius: 6px;">Critical</span></td>
-                                <td><span class="badge-status" style="background: #FFFBEB; color: #F59E0B;">Pending</span></td>
-                                <td><span style="font-size: 12px; color: #64748B;">Jan 28, 2026</span></td>
-                                <td>
-                                    <div style="display: flex; gap: 4px;">
-                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="eye" style="width: 14px; height: 14px;"></i></button>
-                                        <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;"><i data-lucide="more-horizontal" style="width: 14px; height: 14px;"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
+                            {% if recent_decisions %}
+                                {% for decision in recent_decisions %}
+                                <tr>
+                                    <td>
+                                        <div style="font-size: 13px; font-weight: 600; color: #1E293B; margin-bottom: 2px;">{{ decision.title }}</div>
+                                        <div style="font-size: 11px; color: #94A3B8; font-family: monospace;">DEC-{{ decision.id }}</div>
+                                    </td>
+                                    <td>
+                                        <span style="font-size: 11px; font-weight: 600; color: #2563EB; background: #EFF6FF; padding: 2px 8px; border-radius: 12px;">{{ decision.category_name }}</span>
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <div style="width: 24px; height: 24px; border-radius: 50%; background: #2563EB; color: white; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;">{{ decision.requester_name[:2].upper() if decision.requester_name else '?' }}</div>
+                                            <span style="font-size: 12px; color: #334155;">{{ decision.requester_name }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if decision.reviewer_name %}
+                                        <span style="font-size: 12px; color: #334155;">{{ decision.reviewer_name }}</span>
+                                        {% else %}
+                                        <span style="font-size: 12px; font-weight: 700; color: #EF4444;">Unassigned</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if decision.priority == 'Critical' %}
+                                        <span style="font-size: 11px; font-weight: 700; color: #EF4444; background: #FEF2F2; padding: 2px 8px; border-radius: 6px;">Critical</span>
+                                        {% elif decision.priority == 'High' %}
+                                        <span style="font-size: 11px; font-weight: 700; color: #F59E0B; background: #FFFBEB; padding: 2px 8px; border-radius: 6px;">High</span>
+                                        {% elif decision.priority == 'Medium' %}
+                                        <span style="font-size: 11px; font-weight: 700; color: #2563EB; background: #EFF6FF; padding: 2px 8px; border-radius: 6px;">Medium</span>
+                                        {% else %}
+                                        <span style="font-size: 11px; font-weight: 700; color: #64748B; background: #F1F5F9; padding: 2px 8px; border-radius: 6px;">{{ decision.priority }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if decision.status == 'Pending' %}
+                                        <span class="badge-status" style="background: #FFFBEB; color: #F59E0B;">Pending</span>
+                                        {% elif decision.status == 'In Review' or decision.status == 'Review' %}
+                                        <span class="badge-status" style="background: #F5F3FF; color: #8B5CF6;">Review</span>
+                                        {% elif decision.status == 'Approved' %}
+                                        <span class="badge-status" style="background: #ECFDF5; color: #10B981;">Approved</span>
+                                        {% elif decision.status == 'Draft' %}
+                                        <span class="badge-status" style="background: #F1F5F9; color: #64748B;">Draft</span>
+                                        {% else %}
+                                        <span class="badge-status" style="background: #F1F5F9; color: #64748B;">{{ decision.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><span style="font-size: 12px; color: #64748B;">{{ decision.updated_at.strftime('%b %d, %Y') if decision.updated_at else 'N/A' }}</span></td>
+                                    <td>
+                                        <div style="display: flex; gap: 4px;">
+                                            <button style="border: 1px solid #E2E8F0; background: white; border-radius: 6px; padding: 4px 8px; color: #64748B;" onclick="window.location.href='{{ url_for('decision_detail', decision_id=decision.id) }}'"><i data-lucide="eye" style="width: 14px; height: 14px;"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="8" style="text-align: center; color: #94A3B8; font-size: 13px; padding: 24px;">No team decisions found.</td>
+                                </tr>
+                            {% endif %}
                         </tbody>
                     </table>
                 </div>

@@ -260,7 +260,7 @@
                         <input type="checkbox" id="rememberMe" style="width: 16px; height: 16px; accent-color: #2563EB;">
                         <label for="rememberMe" class="remember-label">Remember me</label>
                     </div>
-                    <a href="#" class="forgot-link">Forgot password?</a>
+                    <a href="#" class="forgot-link" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">Forgot password?</a>
                 </div>
 
                 <!-- Sign In Button -->
@@ -275,6 +275,48 @@
         </div>
     </div>
 
+    <!-- Forgot Password Modal -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+          <div class="modal-header" style="border-bottom: 1px solid #F1F5F9; padding: 24px;">
+            <h5 class="modal-title" id="forgotPasswordModalLabel" style="font-weight: 800; color: #0F172A;">Reset Password</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" style="padding: 24px;">
+              <!-- Step 1: Email -->
+              <div id="fpStep1">
+                  <p style="font-size: 14px; color: #64748B; margin-bottom: 20px;">Enter your registered email address to receive a verification code.</p>
+                  <label class="form-label-custom">Email Address</label>
+                  <div class="input-group-custom mb-4">
+                      <input type="email" id="fpEmail" class="input-field" placeholder="john@company.com" style="padding-left: 16px;">
+                  </div>
+                  <button type="button" class="btn-submit" id="fpSendCodeBtn">Send Verification Code</button>
+              </div>
+              
+              <!-- Step 2: Code & New Password -->
+              <div id="fpStep2" style="display: none;">
+                  <p style="font-size: 14px; color: #64748B; margin-bottom: 20px;">We've sent a 6-digit code to your email. Enter it below along with your new password.</p>
+                  
+                  <label class="form-label-custom">Verification Code</label>
+                  <div class="input-group-custom mb-3">
+                      <input type="text" id="fpCode" class="input-field" placeholder="123456" maxlength="6" style="padding-left: 16px;">
+                  </div>
+                  
+                  <label class="form-label-custom">New Password</label>
+                  <div class="input-group-custom mb-4">
+                      <input type="password" id="fpNewPassword" class="input-field" placeholder="••••••••••••" style="padding-left: 16px;">
+                  </div>
+                  
+                  <button type="button" class="btn-submit" id="fpResetBtn">Reset Password</button>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         lucide.createIcons();
         
@@ -286,7 +328,82 @@
             // toggle the type attribute
             const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
             password.setAttribute('type', type);
-            // We can keep the same eye icon, or change it. Keeping it simple.
+        });
+
+        // Forgot Password Logic
+        const fpSendCodeBtn = document.getElementById('fpSendCodeBtn');
+        const fpResetBtn = document.getElementById('fpResetBtn');
+        const fpEmail = document.getElementById('fpEmail');
+        
+        fpSendCodeBtn.addEventListener('click', async function() {
+            if (!fpEmail.value) {
+                alert("Please enter an email address");
+                return;
+            }
+            
+            fpSendCodeBtn.textContent = "Sending...";
+            fpSendCodeBtn.disabled = true;
+            
+            try {
+                const res = await fetch('/api/send-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: fpEmail.value, purpose: 'reset_password' })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    document.getElementById('fpStep1').style.display = 'none';
+                    document.getElementById('fpStep2').style.display = 'block';
+                } else {
+                    alert("Error: " + (data.detail || "Failed to send code"));
+                    fpSendCodeBtn.textContent = "Send Verification Code";
+                    fpSendCodeBtn.disabled = false;
+                }
+            } catch (err) {
+                alert("Error sending request.");
+                fpSendCodeBtn.textContent = "Send Verification Code";
+                fpSendCodeBtn.disabled = false;
+            }
+        });
+        
+        fpResetBtn.addEventListener('click', async function() {
+            const code = document.getElementById('fpCode').value;
+            const newPassword = document.getElementById('fpNewPassword').value;
+            
+            if (code.length !== 6 || newPassword.length < 6) {
+                alert("Please enter a valid 6-digit code and a new password (min 6 chars).");
+                return;
+            }
+            
+            fpResetBtn.textContent = "Resetting...";
+            fpResetBtn.disabled = true;
+            
+            try {
+                const res = await fetch('/api/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        email: fpEmail.value, 
+                        code: code, 
+                        new_password: newPassword 
+                    })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    alert("Password reset successfully! You can now log in.");
+                    window.location.reload();
+                } else {
+                    alert("Error: " + (data.detail || "Failed to reset password"));
+                    fpResetBtn.textContent = "Reset Password";
+                    fpResetBtn.disabled = false;
+                }
+            } catch (err) {
+                alert("Error sending request.");
+                fpResetBtn.textContent = "Reset Password";
+                fpResetBtn.disabled = false;
+            }
         });
     </script>
 </body>

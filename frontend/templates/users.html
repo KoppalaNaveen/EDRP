@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">User Management</h2>
+        <p class="text-muted mb-0">Manage all registered users, roles, and access levels.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <div class="input-group" style="width: 260px;">
+            <span class="input-group-text bg-white border-end-0">
+                <i data-lucide="search" style="width:16px;height:16px;color:#94a3b8;"></i>
+            </span>
+            <input type="text" id="userSearch" class="form-control border-start-0 ps-0" placeholder="Search users..." oninput="handleSearch()">
+        </div>
+        <select id="roleFilter" class="form-select" style="width:160px;" onchange="handleSearch()">
+            <option value="">All Roles</option>
+            <option value="Employee">Employee</option>
+            <option value="Reviewer">Reviewer</option>
+            <option value="Manager">Manager</option>
+            <option value="Administrator">Administrator</option>
+        </select>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-3 p-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#EEF2FF,#C7D2FE);display:flex;align-items:center;justify-content:center;">
+                    <i data-lucide="users" style="width:20px;height:20px;color:#4F46E5;"></i>
+                </div>
+                <div>
+                    <div id="statTotal" class="fw-bold fs-4 text-dark lh-1">—</div>
+                    <div class="text-muted" style="font-size:12px;">Total Users</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-3 p-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#ECFDF5,#A7F3D0);display:flex;align-items:center;justify-content:center;">
+                    <i data-lucide="user-check" style="width:20px;height:20px;color:#059669;"></i>
+                </div>
+                <div>
+                    <div id="statActive" class="fw-bold fs-4 text-dark lh-1">—</div>
+                    <div class="text-muted" style="font-size:12px;">Active Users</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-3 p-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#FFF7ED,#FED7AA);display:flex;align-items:center;justify-content:center;">
+                    <i data-lucide="shield" style="width:20px;height:20px;color:#D97706;"></i>
+                </div>
+                <div>
+                    <div id="statAdmins" class="fw-bold fs-4 text-dark lh-1">—</div>
+                    <div class="text-muted" style="font-size:12px;">Admins</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-3 p-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#EFF6FF,#BFDBFE);display:flex;align-items:center;justify-content:center;">
+                    <i data-lucide="user-plus" style="width:20px;height:20px;color:#2563EB;"></i>
+                </div>
+                <div>
+                    <div id="statInactive" class="fw-bold fs-4 text-dark lh-1">—</div>
+                    <div class="text-muted" style="font-size:12px;">Inactive</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="card border-0 shadow-sm" style="border-radius:12px;overflow:hidden;">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" style="font-size:0.9rem;">
+            <thead class="table-light text-secondary" style="font-size:0.75rem;text-transform:uppercase;">
+                <tr>
+                    <th class="px-4 py-3 border-bottom-0">User</th>
+                    <th class="px-4 py-3 border-bottom-0">Employee ID</th>
+                    <th class="px-4 py-3 border-bottom-0">Role</th>
+                    <th class="px-4 py-3 border-bottom-0">Designation</th>
+                    <th class="px-4 py-3 border-bottom-0">Phone</th>
+                    <th class="px-4 py-3 border-bottom-0">Status</th>
+                    <th class="px-4 py-3 border-bottom-0 text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="usersTableBody" class="border-top-0">
+                <tr><td colspan="7" class="text-center py-5 text-muted">
+                    <div class="spinner-border spinner-border-sm me-2"></div>Loading users...
+                </td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="card-footer bg-white border-top py-3 px-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <span id="paginationInfo" class="text-muted small">Loading...</span>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-outline-secondary px-3" id="btnPrev" onclick="prevPage()" disabled>Previous</button>
+                <span id="pageIndicator" class="text-muted small px-2">—</span>
+                <button class="btn btn-sm btn-outline-secondary px-3" id="btnNext" onclick="nextPage()" disabled>Next</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Role Badge Colors -->
+<style>
+.role-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    display: inline-block;
+}
+.role-employee { background: #EEF2FF; color: #4F46E5; }
+.role-reviewer  { background: #FFF7ED; color: #D97706; }
+.role-manager   { background: #ECFDF5; color: #059669; }
+.role-administrator { background: #FEF2F2; color: #DC2626; }
+.user-avatar-sm {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, #667EEA, #764BA2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+}
+</style>
+
+<script>
+    const API_URL = "http://127.0.0.1:8000";
+</script>
+<script src="{{ url_for('static', filename='js/users.js') }}"></script>
+{% endblock %}

@@ -1,7 +1,118 @@
 {% extends "base.html" %}
 
+{% block css %}
+<style>
+.replay-card {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    transition: box-shadow 0.2s, transform 0.15s;
+    cursor: default;
+}
+.replay-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+}
+.replay-action-pill {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+.replay-icon-wrap {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.empty-state {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 80px 0; color: #94A3B8; text-align: center;
+}
+</style>
+{% endblock %}
+
 {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">Decision Replays</h2>
+        <p class="text-muted mb-0">Review and replay the history of all recorded decision actions.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <div class="input-group" style="width:240px;">
+            <span class="input-group-text bg-white border-end-0">
+                <i data-lucide="search" style="width:15px;height:15px;color:#94a3b8;"></i>
+            </span>
+            <input type="text" id="replaySearch" class="form-control border-start-0 ps-0" placeholder="Search replays..." oninput="filterReplays()">
+        </div>
+        <select id="actionFilter" class="form-select" style="width:180px;" onchange="filterReplays()">
+            <option value="">All Actions</option>
+        </select>
+    </div>
+</div>
 
-<h1>Replays</h1>
+<!-- Summary Stat -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-3 p-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#EEF2FF,#C7D2FE);display:flex;align-items:center;justify-content:center;">
+                    <i data-lucide="play-circle" style="width:20px;height:20px;color:#4F46E5;"></i>
+                </div>
+                <div>
+                    <div id="statTotalReplays" class="fw-bold fs-4 lh-1">—</div>
+                    <div class="text-muted" style="font-size:12px;">Total Replays</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-3 p-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#ECFDF5,#A7F3D0);display:flex;align-items:center;justify-content:center;">
+                    <i data-lucide="file-text" style="width:20px;height:20px;color:#059669;"></i>
+                </div>
+                <div>
+                    <div id="statUniqueDecisions" class="fw-bold fs-4 lh-1">—</div>
+                    <div class="text-muted" style="font-size:12px;">Unique Decisions</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-3 p-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#FFF7ED,#FED7AA);display:flex;align-items:center;justify-content:center;">
+                    <i data-lucide="activity" style="width:20px;height:20px;color:#D97706;"></i>
+                </div>
+                <div>
+                    <div id="statActionTypes" class="fw-bold fs-4 lh-1">—</div>
+                    <div class="text-muted" style="font-size:12px;">Action Types</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- Replay List -->
+<div id="replayContainer" class="row g-3">
+    <div class="col-12 text-center py-5 text-muted">
+        <div class="spinner-border spinner-border-sm me-2"></div>Loading replays...
+    </div>
+</div>
+
+<!-- Pagination -->
+<div class="d-flex justify-content-between align-items-center mt-4">
+    <span id="replayPaginationInfo" class="text-muted small"></span>
+    <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-secondary px-3" id="replayBtnPrev" onclick="prevPage()" disabled>Previous</button>
+        <button class="btn btn-sm btn-outline-secondary px-3" id="replayBtnNext" onclick="nextPage()" disabled>Next</button>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://127.0.0.1:8000";
+</script>
+<script src="{{ url_for('static', filename='js/replay.js') }}"></script>
 {% endblock %}

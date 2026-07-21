@@ -1,7 +1,125 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">Pending Reviews</h2>
+        <p class="text-muted mb-0">Track and manage all approval requests assigned to you.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <div class="input-group" style="width:240px;">
+            <span class="input-group-text bg-white border-end-0">
+                <i data-lucide="search" style="width:15px;height:15px;color:#94a3b8;"></i>
+            </span>
+            <input type="text" id="reviewSearch" class="form-control border-start-0 ps-0" placeholder="Search reviews..." oninput="filterReviews()">
+        </div>
+    </div>
+</div>
 
-<h1>Reviews</h1>
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#EEF2FF,#C7D2FE);display:flex;align-items:center;justify-content:center;">
+                    <i data-lucide="clipboard-list" style="width:18px;height:18px;color:#4F46E5;"></i>
+                </div>
+                <div><div id="statAll" class="fw-bold fs-5 lh-1">—</div><div class="text-muted" style="font-size:11px;">Total</div></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#FFF7ED,#FED7AA);display:flex;align-items:center;justify-content:center;">
+                    <i data-lucide="clock" style="width:18px;height:18px;color:#D97706;"></i>
+                </div>
+                <div><div id="statPending" class="fw-bold fs-5 lh-1">—</div><div class="text-muted" style="font-size:11px;">Pending</div></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#ECFDF5,#A7F3D0);display:flex;align-items:center;justify-content:center;">
+                    <i data-lucide="check-circle" style="width:18px;height:18px;color:#059669;"></i>
+                </div>
+                <div><div id="statApproved" class="fw-bold fs-5 lh-1">—</div><div class="text-muted" style="font-size:11px;">Approved</div></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#FEF2F2,#FECACA);display:flex;align-items:center;justify-content:center;">
+                    <i data-lucide="x-circle" style="width:18px;height:18px;color:#DC2626;"></i>
+                </div>
+                <div><div id="statRejected" class="fw-bold fs-5 lh-1">—</div><div class="text-muted" style="font-size:11px;">Rejected</div></div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- Filter Tabs -->
+<ul class="nav nav-tabs mb-4 border-bottom-0" style="gap:0.75rem;">
+    <li class="nav-item">
+        <button class="nav-link active fw-bold px-0 pb-2 border-0 border-bottom border-primary border-3 bg-transparent text-primary" style="border-radius:0;" onclick="setFilter('all', this)">
+            All <span class="badge rounded-pill ms-1" id="tabAll" style="background:#EEF2FF;color:#4F46E5;font-size:10px;">0</span>
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link fw-medium px-0 pb-2 border-0 bg-transparent text-secondary" style="border-radius:0;" onclick="setFilter('Pending', this)">
+            Pending <span class="badge rounded-pill ms-1" id="tabPending" style="background:#FFF7ED;color:#D97706;font-size:10px;">0</span>
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link fw-medium px-0 pb-2 border-0 bg-transparent text-secondary" style="border-radius:0;" onclick="setFilter('Approved', this)">
+            Approved <span class="badge rounded-pill ms-1" id="tabApproved" style="background:#ECFDF5;color:#059669;font-size:10px;">0</span>
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link fw-medium px-0 pb-2 border-0 bg-transparent text-secondary" style="border-radius:0;" onclick="setFilter('Rejected', this)">
+            Rejected <span class="badge rounded-pill ms-1" id="tabRejected" style="background:#FEF2F2;color:#DC2626;font-size:10px;">0</span>
+        </button>
+    </li>
+</ul>
+
+<!-- Reviews Table -->
+<div class="card border-0 shadow-sm" style="border-radius:12px;overflow:hidden;">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" style="font-size:0.9rem;">
+            <thead class="table-light text-secondary" style="font-size:0.75rem;text-transform:uppercase;">
+                <tr>
+                    <th class="px-4 py-3 border-bottom-0">Decision</th>
+                    <th class="px-4 py-3 border-bottom-0">Reviewer</th>
+                    <th class="px-4 py-3 border-bottom-0">Approval Type</th>
+                    <th class="px-4 py-3 border-bottom-0">Comments</th>
+                    <th class="px-4 py-3 border-bottom-0">Reviewed At</th>
+                    <th class="px-4 py-3 border-bottom-0">Status</th>
+                    <th class="px-4 py-3 border-bottom-0 text-end">Action</th>
+                </tr>
+            </thead>
+            <tbody id="reviewsTableBody" class="border-top-0">
+                <tr><td colspan="7" class="text-center py-5 text-muted">
+                    <div class="spinner-border spinner-border-sm me-2"></div>Loading reviews...
+                </td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="card-footer bg-white border-top py-3 px-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <span id="reviewPaginationInfo" class="text-muted small">Loading...</span>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-outline-secondary px-3" id="reviewBtnPrev" onclick="prevPage()" disabled>Previous</button>
+                <span id="reviewPageIndicator" class="text-muted small px-2">—</span>
+                <button class="btn btn-sm btn-outline-secondary px-3" id="reviewBtnNext" onclick="nextPage()" disabled>Next</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://127.0.0.1:8000";
+</script>
+<script src="{{ url_for('static', filename='js/review.js') }}"></script>
 {% endblock %}

@@ -1,133 +1,988 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="mb-3">
-    <a href="{{ url_for('decisions') }}" class="text-decoration-none"><i class="bi bi-arrow-left"></i> Back to Decisions</a>
+<style>
+    /* Custom Premium CSS for Decision Details */
+    .premium-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        background: #fff;
+    }
+    .timeline-vertical {
+        position: relative;
+        padding-left: 24px;
+    }
+    .timeline-vertical::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        bottom: 0;
+        left: 5px;
+        width: 2px;
+        background: #e2e8f0;
+    }
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        top: 4px;
+        left: -23.5px;
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: #fff;
+        border: 2px solid #cbd5e1;
+    }
+    .timeline-item.completed::before {
+        border-color: #3b82f6;
+        background: #3b82f6;
+    }
+    .timeline-item.active::before {
+        border-color: #3b82f6;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+    
+    .alt-progress-bar {
+        height: 8px;
+        border-radius: 4px;
+        background-color: #e2e8f0;
+        overflow: hidden;
+    }
+    .alt-progress-fill {
+        height: 100%;
+        border-radius: 4px;
+    }
+    .avatar-sm {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: bold;
+    }
+</style>
+
+<!-- Header Section -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1 text-sm">
+                <li class="breadcrumb-item"><a href="{{ url_for('decisions') }}" class="text-decoration-none text-muted"><i class="bi bi-house"></i> Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('decisions') }}" class="text-decoration-none text-muted">My Decisions</a></li>
+                <li class="breadcrumb-item active fw-bold text-dark" aria-current="page">DEC-{{ decision_id }}</li>
+            </ol>
+        </nav>
+        <div class="d-flex align-items-center mt-2">
+            <h2 class="fw-bold mb-0 me-3 text-dark" id="detailTitle">Loading...</h2>
+            <span id="decisionStatusBadge" class="badge rounded-pill bg-light text-dark border px-3 py-2 fw-semibold">...</span>
+        </div>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-white border shadow-sm fw-semibold text-secondary d-flex align-items-center" onclick="window.location.href='/create-decision?edit=' + DECISION_ID">
+            <i class="bi bi-pencil me-2"></i> Edit
+        </button>
+        <button class="btn btn-primary shadow-sm fw-semibold d-flex align-items-center" onclick="sendReminder()">
+            <i class="bi bi-bell me-2"></i> Send Reminder
+        </button>
+    </div>
 </div>
 
-<div class="row">
-    <!-- Left Column: Decision Details -->
-    <div class="col-md-4">
-        <div class="card shadow mb-4">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Decision Details</h5>
-                <span id="decisionStatusBadge" class="badge bg-light text-dark">Loading...</span>
-            </div>
-            <div class="card-body">
-                <h4 id="detailTitle" class="fw-bold mb-3">Loading...</h4>
-                <p id="detailDescription" class="text-muted"></p>
-                <hr>
-                <div class="mb-2">
-                    <small class="text-muted fw-bold">Created By:</small> <span id="detailCreator">...</span>
+<!-- Tab Navigation Header (Workflow 3/3b) -->
+<ul class="nav nav-pills mb-4 bg-white p-2 rounded-3 border shadow-sm" id="decisionTabs" style="gap: 0.5rem;">
+    <li class="nav-item">
+        <a class="nav-link active fw-bold text-sm px-4" href="#" id="tab-link-overview" onclick="switchTab('overview')">
+            <i class="bi bi-info-circle me-2"></i>Overview
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link fw-semibold text-secondary text-sm px-4" href="#" id="tab-link-rationale" onclick="switchTab('rationale')">
+            <i class="bi bi-file-earmark-text me-2"></i>Rationale
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link fw-semibold text-secondary text-sm px-4" href="#" id="tab-link-discussions" onclick="switchTab('discussions')">
+            <i class="bi bi-chat-left-text me-2"></i>Discussions
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link fw-semibold text-secondary text-sm px-4" href="#" id="tab-link-meeting_notes" onclick="switchTab('meeting_notes')">
+            <i class="bi bi-calendar-event me-2"></i>Meeting Notes
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link fw-semibold text-secondary text-sm px-4" href="#" id="tab-link-documents" onclick="switchTab('documents')">
+            <i class="bi bi-paperclip me-2"></i>Supporting Documents
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link fw-semibold text-secondary text-sm px-4" href="#" id="tab-link-history" onclick="switchTab('history')">
+            <i class="bi bi-clock-history me-2"></i>Version History
+        </a>
+    </li>
+</ul>
+
+<!-- Overview Tab -->
+<div id="tab-pane-overview" class="tab-pane-content">
+    <div class="row g-4">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Context Card -->
+            <div class="premium-card mb-4 p-4">
+                <h5 class="fw-bold text-dark mb-3">Decision Context</h5>
+                <p class="text-muted" id="detailDescription" style="line-height: 1.7;"></p>
+                
+                <!-- Quick Meta inline -->
+                <div class="d-flex gap-4 mt-4 pt-3 border-top">
+                    <div>
+                        <small class="text-muted d-block mb-1">Owner</small>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-sm bg-primary text-white me-2">O</div>
+                            <span class="fw-semibold text-dark text-sm" id="detailCreator">...</span>
+                        </div>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block mb-1">Created Date</small>
+                        <span class="fw-semibold text-dark text-sm" id="detailDate">...</span>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block mb-1">Due Date</small>
+                        <span class="fw-semibold text-dark text-sm" id="detailDueDate">Not set</span>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <small class="text-muted fw-bold">Date:</small> <span id="detailDate">...</span>
+            </div>
+
+            <!-- Alternatives Evaluation (Workflow 3b) -->
+            <div class="premium-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-1">Alternatives Considered</h5>
+                        <p class="text-muted text-sm mb-0">Evaluate and compare the options for this decision.</p>
+                    </div>
+                    <button class="btn btn-outline-primary btn-sm fw-semibold" onclick="openAlternativeModal()">
+                        <i class="bi bi-plus"></i> Add Option
+                    </button>
                 </div>
                 
-                <div class="mt-4">
-                    <label class="form-label fw-semibold">Update Status</label>
-                    <select id="statusSelect" class="form-select mb-2">
-                        <option value="Pending">Pending</option>
-                        <option value="Under Review">Under Review</option>
-                        <option value="Approved">Approved</option>
-                        <option value="Rejected">Rejected</option>
-                        <option value="Archived">Archived</option>
-                    </select>
-                    <button class="btn btn-outline-primary w-100" onclick="updateStatus()">Save Status</button>
+                <div id="alternativesEvaluatorList">
+                    <!-- Data populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Decision Info / Meta -->
+            <div class="premium-card p-4 mb-4">
+                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Decision Info</h6>
+                
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Category</small>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1" id="infoCategory">General</span>
+                </div>
+                
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Impact Level</small>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-arrow-up-circle-fill text-danger me-2"></i>
+                        <span class="fw-semibold text-dark" id="infoImpact">High Impact</span>
+                    </div>
+                </div>
+                
+                <div>
+                    <small class="text-muted d-block mb-2">Tags</small>
+                    <div class="d-flex flex-wrap gap-1" id="infoTags">
+                        <!-- Tags populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Approval Chain Timeline -->
+            <div class="premium-card p-4">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                    <h6 class="fw-bold text-dark mb-0">Approval Chain</h6>
+                </div>
+                
+                <div class="timeline-vertical mt-3" id="approvalChainContainer">
+                    <div class="text-center py-4 text-muted small">Loading approval chain...</div>
+                </div>
+                
+                <!-- Admin override for demo purposes -->
+                <div class="mt-4 pt-3 border-top">
+                    <label class="form-label fw-semibold text-sm">Override Status (Demo)</label>
+                    <div class="input-group input-group-sm">
+                        <select id="statusSelect" class="form-select border-end-0">
+                            <option value="Pending">Pending</option>
+                            <option value="Under Review">Under Review</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                        <button class="btn btn-outline-secondary" onclick="updateStatus()">Update</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Right Column: Alternatives -->
-    <div class="col-md-8">
-        <div class="card shadow">
-            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom-0">
-                <h5 class="mb-0 text-primary fw-bold">Alternatives Analysis</h5>
-                <button class="btn btn-sm btn-primary" onclick="openAlternativeModal()">
-                    <i class="bi bi-plus"></i> Add Alternative
-                </button>
+<!-- Rationale Tab -->
+<div id="tab-pane-rationale" class="tab-pane-content d-none">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="premium-card p-4 mb-4">
+                <h5 class="fw-bold text-dark mb-3">Reason for Decision</h5>
+                <p class="text-muted" style="line-height: 1.7;">
+                    The core justification for this decision aligns with the strategic imperative to optimize technology investments, reduce infrastructure constraints, and comply with regulatory security guidelines.
+                </p>
+                <div class="alert alert-info border-0 bg-light-subtle d-flex align-items-center mb-0 mt-3" style="border-radius: 8px;">
+                    <i class="bi bi-info-circle-fill text-primary fs-5 me-3"></i>
+                    <span class="text-muted text-sm">Decision rationale is auto-generated based on the recommended alternative comparison score and business requirements.</span>
+                </div>
             </div>
-            <div class="card-body p-0">
+
+            <div class="premium-card p-4 mb-4">
+                <h5 class="fw-bold text-dark mb-3">Alternatives pros & cons</h5>
+                <div class="row g-3" id="rationaleProsCons">
+                    <!-- Loaded dynamically via JS -->
+                </div>
+            </div>
+
+            <div class="premium-card p-4">
+                <h5 class="fw-bold text-dark mb-3">Risk Assessment</h5>
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                    <table class="table align-middle text-sm mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th class="ps-4">Title</th>
-                                <th>Cost</th>
-                                <th>Risk</th>
-                                <th>Feasibility</th>
-                                <th class="text-end pe-4">Actions</th>
+                                <th>Risk Description</th>
+                                <th>Impact Level</th>
+                                <th>Mitigation Strategy</th>
                             </tr>
                         </thead>
-                        <tbody id="alternativesTableBody">
-                            <!-- Populated via JS -->
+                        <tbody id="rationaleRiskTable">
+                            <!-- Loaded dynamically via JS -->
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+
+        <div class="col-lg-4">
+            <div class="premium-card p-4 mb-4">
+                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Business Justification</h6>
+                <div class="row g-3 text-center mb-3">
+                    <div class="col-6">
+                        <div class="border rounded p-3 bg-light">
+                            <h4 class="fw-bold text-primary mb-1">$2.4M</h4>
+                            <small class="text-muted text-xs">Total Investment</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3 bg-light">
+                            <h4 class="fw-bold text-success mb-1">$4.3M</h4>
+                            <small class="text-muted text-xs">3-Year Savings</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3 bg-light">
+                            <h4 class="fw-bold text-info mb-1">180%</h4>
+                            <small class="text-muted text-xs">Expected ROI</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3 bg-light">
+                            <h4 class="fw-bold text-warning mb-1">Q2 2025</h4>
+                            <small class="text-muted text-xs">Break-even</small>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-muted text-sm mb-0" style="line-height: 1.6;">
+                    Consolidation of licenses and shifting from capital expenses to an elastic operational model guarantees lower maintenance costs and standardizes security governance.
+                </p>
+            </div>
+
+            <div class="premium-card p-4">
+                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Expected Outcome Timeline</h6>
+                <div class="timeline-vertical mt-3" style="padding-left: 20px;">
+                    <div class="timeline-item completed">
+                        <h6 class="fw-bold text-sm mb-0">Q1 2025 Planned</h6>
+                        <small class="text-muted">Infrastructure baseline deployed</small>
+                    </div>
+                    <div class="timeline-item active">
+                        <h6 class="fw-bold text-sm mb-0">Q2 2025 Planned</h6>
+                        <small class="text-muted">Primary workloads migrated</small>
+                    </div>
+                    <div class="timeline-item">
+                        <h6 class="fw-bold text-sm mb-0">Q3 2025 Projected</h6>
+                        <small class="text-muted">Break-even achieved</small>
+                    </div>
+                    <div class="timeline-item">
+                        <h6 class="fw-bold text-sm mb-0">Q4 2025 Planned</h6>
+                        <small class="text-muted">Full legacy decommissioned</small>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Alternative Add/Edit Modal -->
-<div class="modal fade" id="alternativeModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title fw-bold" id="altModalTitle">Add Alternative</h5>
+<!-- Discussions Tab (Workflow 3b) -->
+<div id="tab-pane-discussions" class="tab-pane-content d-none">
+    <div class="row g-4">
+        <!-- Threads List Panel -->
+        <div class="col-md-5 col-lg-4">
+            <div class="premium-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold text-dark mb-0">Discussion Threads</h6>
+                    <button class="btn btn-primary btn-sm px-3" onclick="openNewThreadModal()">
+                        <i class="bi bi-plus-circle me-1"></i>New Thread
+                    </button>
+                </div>
+                <input type="text" id="threadSearch" class="form-control form-control-sm mb-3" placeholder="Search threads...">
+                
+                <div id="threadsListContainer" class="d-flex flex-column gap-2" style="max-height: 500px; overflow-y: auto;">
+                    <!-- Loaded dynamically via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Comments Feed Panel -->
+        <div class="col-md-7 col-lg-8">
+            <div class="premium-card p-4 d-flex flex-column h-100" style="min-height: 500px;">
+                <div class="border-bottom pb-2 mb-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0" id="currentThreadTopic">Select a Thread</h5>
+                        <span class="badge bg-primary-subtle text-primary border rounded-pill text-xs mt-1" id="currentThreadStatus" style="display: none;">Open</span>
+                    </div>
+                </div>
+
+                <!-- Scrollable comments list -->
+                <div id="commentsFeedContainer" class="flex-grow-1 mb-3" style="max-height: 400px; overflow-y: auto; padding-right: 8px;">
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-chat-dots text-secondary fs-2 d-block mb-2"></i>
+                        Select a thread from the panel to view conversation comments.
+                    </div>
+                </div>
+
+                <!-- Add Comment box -->
+                <div class="mt-auto border-top pt-3" id="addCommentFormBox" style="display: none;">
+                    <div class="input-group">
+                        <textarea class="form-control border-light-subtle" id="newCommentContent" rows="2" placeholder="Write your comment... Use @ to mention teammates" style="resize: none;"></textarea>
+                        <button class="btn btn-primary px-4" type="button" onclick="submitComment()">Post</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Meeting Notes Tab (Workflow 3b) -->
+<div id="tab-pane-meeting_notes" class="tab-pane-content d-none">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="premium-card p-4">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-1">Meeting Notes Log</h5>
+                        <p class="text-muted text-sm mb-0">Review documented session records and action items.</p>
+                    </div>
+                    <button class="btn btn-outline-primary btn-sm fw-semibold" onclick="openNewMeetingNoteModal()">
+                        <i class="bi bi-calendar-plus me-1"></i> Add Notes
+                    </button>
+                </div>
+
+                <div id="meetingNotesContainer">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="premium-card p-4 mb-4">
+                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Participants</h6>
+                <div id="meetingParticipantsContainer" class="d-flex flex-column gap-2">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <div class="premium-card p-4">
+                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Next Scheduled Session</h6>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-3 bg-primary-subtle text-primary d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; flex-shrink: 0;">
+                        <i class="bi bi-calendar-event fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1 text-sm">Implementation Sync</h6>
+                        <span class="text-muted text-xs">Tomorrow · 2:00 PM · Zoom</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Supporting Documents Tab (Workflow 3b) -->
+<div id="tab-pane-documents" class="tab-pane-content d-none">
+    <div class="premium-card p-4">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+            <div>
+                <h5 class="fw-bold text-dark mb-1">Supporting Documents</h5>
+                <p class="text-muted text-sm mb-0">Attached materials and reference templates.</p>
+            </div>
+        </div>
+
+        <!-- Drag and drop zone -->
+        <div class="border rounded-3 p-5 text-center mb-4 border-dashed bg-light bg-opacity-50" id="dropzone" style="cursor: pointer;">
+            <i class="bi bi-cloud-arrow-up text-primary fs-1 mb-2"></i>
+            <h6 class="fw-bold text-dark mb-1">Click to upload or drag & drop files here</h6>
+            <p class="text-xs text-muted mb-0">Supports PDF, DOCX, XLSX, PPTX up to 50MB</p>
+            <input type="file" id="fileInput" class="d-none" multiple>
+        </div>
+
+        <!-- Documents List -->
+        <div class="table-responsive">
+            <table class="table align-middle text-sm mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Document Title</th>
+                        <th>File Size</th>
+                        <th>Uploaded By</th>
+                        <th>Uploaded Date</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="documentsTableBody">
+                    <!-- Populated dynamically via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Version History Tab -->
+<div id="tab-pane-history" class="tab-pane-content d-none">
+    <div class="premium-card p-4">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+            <div>
+                <h5 class="fw-bold text-dark mb-1">Version History</h5>
+                <p class="text-muted text-sm mb-0">Timeline of updates and changes to this decision.</p>
+            </div>
+        </div>
+
+        <div class="timeline-vertical mt-3" id="versionHistoryContainer">
+            <div class="text-center py-4 text-muted small">Loading version history...</div>
+        </div>
+    </div>
+</div>
+
+<!-- New Thread Modal -->
+<div class="modal fade" id="newThreadModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold">Start New Thread</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
-                <input type="hidden" id="altId">
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Title</label>
-                    <input type="text" id="altTitle" class="form-control" placeholder="e.g. Migrate to AWS">
+                    <label class="form-label fw-semibold text-secondary">Thread Topic</label>
+                    <input type="text" id="newThreadTopicInput" class="form-control" placeholder="E.g., Scalability considerations...">
+                </div>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary px-4" onclick="submitNewThread()">Start Thread</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Meeting Note Modal -->
+<div class="modal fade" id="newMeetingNoteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold">Record Meeting Notes</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-secondary">Meeting Title</label>
+                    <input type="text" id="newMeetingTitle" class="form-control" placeholder="E.g., Q4 Architecture Review">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Description</label>
-                    <textarea id="altDescription" class="form-control" rows="2"></textarea>
+                    <label class="form-label fw-semibold text-secondary">Notes/Minutes</label>
+                    <textarea id="newMeetingNotes" class="form-control" rows="5" placeholder="Meeting summaries, agenda details, actions items..."></textarea>
                 </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-semibold text-success">Pros</label>
-                        <textarea id="altPros" class="form-control" rows="3"></textarea>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-semibold text-danger">Cons</label>
-                        <textarea id="altCons" class="form-control" rows="3"></textarea>
-                    </div>
+                <div class="mb-0">
+                    <label class="form-label fw-semibold text-secondary">Meeting Date</label>
+                    <input type="datetime-local" id="newMeetingDate" class="form-control">
                 </div>
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-semibold">Estimated Cost ($)</label>
-                        <input type="number" id="altCost" class="form-control" step="0.01">
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary px-4" onclick="submitNewMeetingNote()">Save Notes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Meeting Notes Detail Modal -->
+<div class="modal fade" id="meetingNoteDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold" id="detailNoteTitle">Meeting Note Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3 text-muted text-xs">
+                    <i class="bi bi-calendar me-1"></i> <span id="detailNoteDate">...</span>
+                </div>
+                <div class="p-3 bg-light rounded" id="detailNoteContent" style="white-space: pre-line; font-size: 14px; line-height: 1.6;">
+                    ...
+                </div>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Alternative Add/Edit Modal (Multi-Step Wizard) -->
+<div class="modal fade" id="alternativeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+                <h4 class="modal-title fw-bold" id="altModalTitle">Add Alternative Option</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <!-- Wizard Progress Header -->
+            <div class="px-4 pt-3 pb-2 border-bottom">
+                <div class="d-flex justify-content-between position-relative">
+                    <div class="position-absolute top-50 start-0 w-100 border-top z-n1" style="transform: translateY(-50%);"></div>
+                    
+                    <div class="text-center bg-white px-2 z-1">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white bg-primary mx-auto mb-1 step-indicator" id="alt-step1-indicator" style="width: 32px; height: 32px; font-weight: bold; transition: all 0.3s;">1</div>
+                        <small class="fw-semibold text-primary" id="alt-step1-label">Basic Info</small>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-semibold">Risk Level</label>
-                        <select id="altRisk" class="form-select">
-                            <option value="Low">Low</option>
-                            <option value="Medium">Medium</option>
-                            <option value="High">High</option>
-                        </select>
+                    
+                    <div class="text-center bg-white px-2 z-1">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center bg-light text-secondary mx-auto mb-1 step-indicator" id="alt-step2-indicator" style="width: 32px; height: 32px; font-weight: bold; transition: all 0.3s;">2</div>
+                        <small class="fw-semibold text-secondary" id="alt-step2-label">Alignment</small>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-semibold">Feasibility Score (1-10)</label>
-                        <input type="number" id="altFeasibility" class="form-control" min="1" max="10">
+                    
+                    <div class="text-center bg-white px-2 z-1">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center bg-light text-secondary mx-auto mb-1 step-indicator" id="alt-step3-indicator" style="width: 32px; height: 32px; font-weight: bold; transition: all 0.3s;">3</div>
+                        <small class="fw-semibold text-secondary" id="alt-step3-label">Scoring</small>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="saveAlternative()">Save Alternative</button>
+
+            <div class="modal-body p-4" style="background-color: #f8fafc; min-height: 350px;">
+                <input type="hidden" id="altId">
+                
+                <!-- Step 1: Basic Info -->
+                <div id="alt-wizard-step-1" class="alt-wizard-step">
+                    <h5 class="fw-bold mb-3 text-dark">Step 1: Basic Information</h5>
+                    <div class="bg-white p-4 rounded-3 border shadow-sm mb-3">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-secondary">Alternative Title <span class="text-danger">*</span></label>
+                            <input type="text" id="altTitle" class="form-control form-control-lg border-0 bg-light" placeholder="E.g., Cloud Migration (AWS)">
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label fw-semibold text-secondary">Description</label>
+                            <textarea id="altDescription" class="form-control border-0 bg-light" rows="3" placeholder="Detailed explanation of this alternative..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="bg-white p-3 rounded-3 border shadow-sm h-100">
+                                <label class="form-label fw-semibold text-success d-flex align-items-center"><i class="bi bi-plus-circle-fill me-2"></i> Key Pros</label>
+                                <textarea id="altPros" class="form-control border-0 bg-success-subtle bg-opacity-10" rows="3" placeholder="What are the main advantages?"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="bg-white p-3 rounded-3 border shadow-sm h-100">
+                                <label class="form-label fw-semibold text-danger d-flex align-items-center"><i class="bi bi-dash-circle-fill me-2"></i> Key Cons</label>
+                                <textarea id="altCons" class="form-control border-0 bg-danger-subtle bg-opacity-10" rows="3" placeholder="What are the main drawbacks?"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Alignment -->
+                <div id="alt-wizard-step-2" class="alt-wizard-step d-none">
+                    <h5 class="fw-bold mb-3 text-dark">Step 2: Alignment to Objectives</h5>
+                    <p class="text-muted mb-4">Evaluate how well this alternative aligns with strategic goals.</p>
+                    
+                    <div class="bg-white p-4 rounded-3 border shadow-sm">
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between mb-1">
+                                <label class="fw-semibold text-dark">Strategic Fit</label>
+                                <span class="fw-bold text-primary" id="val-strategic">75%</span>
+                            </div>
+                            <input type="range" class="form-range" id="altStrategic" min="0" max="100" value="75" oninput="document.getElementById('val-strategic').innerText = this.value + '%'">
+                            <small class="text-muted d-block mt-1">Alignment with long-term company goals.</small>
+                        </div>
+                        <hr class="text-muted opacity-25">
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between mb-1">
+                                <label class="fw-semibold text-dark">Financial Impact</label>
+                                <span class="fw-bold text-success" id="val-financial">60%</span>
+                            </div>
+                            <input type="range" class="form-range" id="altFinancial" min="0" max="100" value="60" oninput="document.getElementById('val-financial').innerText = this.value + '%'">
+                            <small class="text-muted d-block mt-1">Potential ROI and revenue generation.</small>
+                        </div>
+                        <hr class="text-muted opacity-25">
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between mb-1">
+                                <label class="fw-semibold text-dark">Operational Efficiency</label>
+                                <span class="fw-bold text-info" id="val-operational">80%</span>
+                            </div>
+                            <input type="range" class="form-range" id="altOperational" min="0" max="100" value="80" oninput="document.getElementById('val-operational').innerText = this.value + '%'">
+                            <small class="text-muted d-block mt-1">Improvements to internal processes.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Scoring -->
+                <div id="alt-wizard-step-3" class="alt-wizard-step d-none">
+                    <h5 class="fw-bold mb-3 text-dark">Step 3: Alternative Scoring</h5>
+                    <p class="text-muted mb-4">Finalize the objective scoring metrics for comparison.</p>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="bg-white p-3 rounded-3 border shadow-sm mb-3">
+                                <label class="form-label fw-semibold text-secondary mb-2">Estimated Cost ($)</label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-light border-end-0 text-muted">$</span>
+                                    <input type="number" id="altCost" class="form-control border-start-0 bg-light" step="0.01" placeholder="0.00">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="bg-white p-3 rounded-3 border shadow-sm mb-3">
+                                <label class="form-label fw-semibold text-secondary mb-2">Implementation Time</label>
+                                <select class="form-select form-select-lg bg-light border-0" id="altTime">
+                                    <option value="0-3 Months">0-3 Months</option>
+                                    <option value="3-6 Months">3-6 Months</option>
+                                    <option value="6-12 Months">6-12 Months</option>
+                                    <option value="1+ Years">1+ Years</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="bg-white p-3 rounded-3 border shadow-sm">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <label class="form-label fw-semibold text-secondary mb-0">Risk Level</label>
+                                </div>
+                                <select id="altRisk" class="form-select form-select-lg bg-light border-0">
+                                    <option value="Low">Low</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="High">High</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="bg-white p-3 rounded-3 border shadow-sm">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <label class="form-label fw-semibold text-secondary mb-0">Feasibility</label>
+                                    <span class="fw-bold text-primary" id="val-feasibility">5/10</span>
+                                </div>
+                                <input type="range" class="form-range" id="altFeasibility" min="1" max="10" value="5" oninput="document.getElementById('val-feasibility').innerText = this.value + '/10'">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            <div class="modal-footer bg-white border-top-0 pt-0">
+                <button type="button" class="btn btn-light fw-semibold text-secondary px-4 py-2" id="altBtnPrev" onclick="prevAltStep()" style="display: none;">Back</button>
+                <div class="ms-auto">
+                    <button type="button" class="btn btn-light fw-semibold text-secondary me-2 px-4 py-2" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary fw-semibold px-4 py-2 shadow-sm" id="altBtnNext" onclick="nextAltStep()">Next Step <i class="bi bi-arrow-right ms-1"></i></button>
+                    <button type="button" class="btn btn-success fw-semibold px-4 py-2 shadow-sm" id="altBtnSave" onclick="saveAlternative()" style="display: none;">Save Alternative <i class="bi bi-check2 ms-1"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Discussion Thread Modal -->
+<div class="modal fade" id="newThreadModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold">Start Discussion Thread</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-0">
+                    <label class="form-label fw-semibold text-secondary">Thread Topic</label>
+                    <input type="text" id="newThreadTopicInput" class="form-control" placeholder="E.g., Scalability considerations...">
+                </div>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary px-4" onclick="submitNewThread()">Start Thread</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Meeting Note Modal -->
+<div class="modal fade" id="newMeetingNoteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold">Record Meeting Notes</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-secondary">Meeting Title</label>
+                    <input type="text" id="newMeetingTitle" class="form-control" placeholder="E.g., Q4 Technology Budget Sync">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-secondary">Notes/Minutes</label>
+                    <textarea id="newMeetingNotes" class="form-control" rows="4" placeholder="Agenda items, summaries, action tasks..."></textarea>
+                </div>
+                <div class="mb-0">
+                    <label class="form-label fw-semibold text-secondary">Meeting Date</label>
+                    <input type="datetime-local" id="newMeetingDate" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary px-4" onclick="submitNewMeetingNote()">Save Notes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Meeting Note Detail Modal -->
+<div class="modal fade" id="meetingNoteDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold" id="detailNoteTitle">Meeting Note Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Meeting Date/Time</small>
+                    <span class="fw-semibold text-dark text-sm" id="detailNoteDate">Not set</span>
+                </div>
+                <div>
+                    <small class="text-muted d-block mb-2">Minutes &amp; Action Items</small>
+                    <div class="p-3 bg-light rounded-3 text-muted text-sm" id="detailNoteContent" style="white-space: pre-line; min-height: 120px;"></div>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+    let currentAltStep = 1;
+    const totalAltSteps = 3;
+
+    function openAlternativeModal() {
+        currentAltStep = 1;
+        document.getElementById('altId').value = '';
+        document.getElementById('altTitle').value = '';
+        document.getElementById('altDescription').value = '';
+        document.getElementById('altPros').value = '';
+        document.getElementById('altCons').value = '';
+        document.getElementById('altStrategic').value = 75;
+        document.getElementById('val-strategic').innerText = '75%';
+        document.getElementById('altFinancial').value = 60;
+        document.getElementById('val-financial').innerText = '60%';
+        document.getElementById('altOperational').value = 80;
+        document.getElementById('val-operational').innerText = '80%';
+        document.getElementById('altCost').value = '';
+        document.getElementById('altRisk').value = 'Medium';
+        document.getElementById('altFeasibility').value = 5;
+        document.getElementById('val-feasibility').innerText = '5/10';
+        document.getElementById('altTime').value = '3-6 Months';
+        
+        document.getElementById('altModalTitle').innerText = 'Add Alternative Option';
+        updateAltUI();
+        const modal = new bootstrap.Modal(document.getElementById("alternativeModal"));
+        modal.show();
+    }
+
+    function nextAltStep() {
+        if (currentAltStep === 1) {
+            if (!document.getElementById('altTitle').value.trim()) {
+                showToast("Warning", "Title is required");
+                return;
+            }
+        }
+        
+        if (currentAltStep < totalAltSteps) {
+            currentAltStep++;
+            updateAltUI();
+        }
+    }
+
+    function prevAltStep() {
+        if (currentAltStep > 1) {
+            currentAltStep--;
+            updateAltUI();
+        }
+    }
+
+    function updateAltUI() {
+        for (let i = 1; i <= totalAltSteps; i++) {
+            document.getElementById(`alt-wizard-step-${i}`).classList.add('d-none');
+            
+            const indicator = document.getElementById(`alt-step${i}-indicator`);
+            const label = document.getElementById(`alt-step${i}-label`);
+            
+            if (i < currentAltStep) {
+                indicator.className = 'rounded-circle d-flex align-items-center justify-content-center text-white bg-success mx-auto mb-1 step-indicator';
+                indicator.innerHTML = '<i class="bi bi-check"></i>';
+                label.className = 'fw-semibold text-success';
+            } else if (i === currentAltStep) {
+                indicator.className = 'rounded-circle d-flex align-items-center justify-content-center text-white bg-primary mx-auto mb-1 step-indicator';
+                indicator.innerHTML = i;
+                label.className = 'fw-semibold text-primary';
+            } else {
+                indicator.className = 'rounded-circle d-flex align-items-center justify-content-center bg-light text-secondary mx-auto mb-1 step-indicator';
+                indicator.innerHTML = i;
+                label.className = 'fw-semibold text-secondary';
+            }
+        }
+        document.getElementById(`alt-wizard-step-${currentAltStep}`).classList.remove('d-none');
+
+        document.getElementById('altBtnPrev').style.display = currentAltStep > 1 ? 'inline-block' : 'none';
+        
+        if (currentAltStep === totalAltSteps) {
+            document.getElementById('altBtnNext').style.display = 'none';
+            document.getElementById('altBtnSave').style.display = 'inline-block';
+        } else {
+            document.getElementById('altBtnNext').style.display = 'inline-block';
+            document.getElementById('altBtnSave').style.display = 'none';
+        }
+    }
+    
+    // Original editAlternative overrides from decision_details.js
+    function editAlternative(id) {
+        if(typeof alternativesData === 'undefined') return;
+        const d = alternativesData.find(x => x.id === id);
+        if (!d) return;
+
+        currentAltStep = 1;
+        document.getElementById("altId").value = d.id;
+        document.getElementById("altTitle").value = d.title;
+        document.getElementById("altDescription").value = d.description || '';
+        document.getElementById("altCost").value = d.cost || 0;
+        document.getElementById("altRisk").value = d.risk || 'Medium';
+        document.getElementById("altFeasibility").value = d.feasibility || 5;
+        document.getElementById('val-feasibility').innerText = (d.feasibility || 5) + '/10';
+        
+        document.getElementById("altModalTitle").innerText = "Edit Alternative Option";
+        
+        updateAltUI();
+        const modal = new bootstrap.Modal(document.getElementById("alternativeModal"));
+        modal.show();
+    }
+</script>
+
+<script>
     const API_URL = "http://127.0.0.1:8000";
     const DECISION_ID = "{{ decision_id }}";
+    const USER_ID = parseInt("{{ session.get('user_id', 1) }}", 10);
+
+    function sendReminder() {
+        showToast("Success", "A notification reminder has been successfully sent to the pending reviewers.");
+    }
+    
+    // Override the displayAlternatives function from decision_details.js to render the new beautiful cards instead of a basic table
+    window.addEventListener('load', function() {
+        if(typeof renderAlternativesTable === 'function') {
+            renderAlternativesTable = function() {
+                const list = document.getElementById('alternativesEvaluatorList');
+                if (!list) return;
+                
+                list.innerHTML = '';
+                if (currentAlternatives.length === 0) {
+                    list.innerHTML = `
+                        <div class="text-center p-4 border rounded-3 bg-light border-dashed">
+                            <i class="bi bi-ui-checks-grid text-muted fs-3 mb-2"></i>
+                            <h6 class="text-muted fw-semibold">No alternatives added yet</h6>
+                            <p class="text-sm text-muted mb-0">Add options to start evaluating this decision.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                currentAlternatives.forEach((alt, index) => {
+                    // Generate a random alignment score for visual demonstration if we don't have one
+                    const score = (alt.feasibility_score * 10) || Math.floor(Math.random() * 40 + 60);
+                    const isRecommended = index === 0; // Just for demo, mark first as recommended
+                    
+                    let riskColor = alt.risk_level === 'High' ? 'danger' : (alt.risk_level === 'Medium' ? 'warning' : 'success');
+                    
+                    const card = document.createElement('div');
+                    card.className = `border rounded-3 p-3 mb-3 position-relative ${isRecommended ? 'border-primary-subtle bg-primary-subtle bg-opacity-10' : ''}`;
+                    
+                    card.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex align-items-center">
+                                <i class="bi ${isRecommended ? 'bi-check-circle-fill text-primary' : 'bi-circle text-muted'} me-2"></i>
+                                <h6 class="fw-bold mb-0">${alt.title}</h6>
+                            </div>
+                            <div>
+                                ${isRecommended ? '<span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill me-2">Recommended</span>' : ''}
+                                <button class="btn btn-sm btn-link text-muted p-0" onclick="editAlternative(${alt.id})"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-sm btn-link text-danger p-0 ms-2" onclick="deleteAlternative(${alt.id})"><i class="bi bi-trash"></i></button>
+                            </div>
+                        </div>
+                        <p class="text-sm text-muted mb-3">${alt.description || 'No description provided.'}</p>
+                        <div class="row align-items-center">
+                            <div class="col-sm-5 mb-2 mb-sm-0">
+                                <small class="text-muted d-block mb-1" style="font-size: 11px;">Alignment Score</small>
+                                <div class="d-flex align-items-center">
+                                    <div class="alt-progress-bar w-100 me-2">
+                                        <div class="alt-progress-fill bg-${score > 75 ? 'success' : (score > 50 ? 'warning' : 'danger')}" style="width: ${score}%;"></div>
+                                    </div>
+                                    <span class="fw-bold" style="font-size: 12px;">${score}%</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 col-6">
+                                <small class="text-muted d-block mb-1" style="font-size: 11px;">Cost</small>
+                                <span class="fw-semibold" style="font-size: 13px;">$${alt.cost || '0.00'}</span>
+                            </div>
+                            <div class="col-sm-4 col-6 text-end text-sm-start">
+                                <small class="text-muted d-block mb-1" style="font-size: 11px;">Risk</small>
+                                <span class="badge bg-${riskColor}-subtle text-${riskColor} border border-${riskColor}-subtle px-2 py-1">${alt.risk_level || 'Unknown'}</span>
+                            </div>
+                        </div>
+                    `;
+                    list.appendChild(card);
+                });
+            };
+            
+            // Re-fetch to apply new rendering
+            if (typeof fetchAlternatives === 'function') {
+                fetchAlternatives();
+            }
+        }
+    });
 </script>
 <script src="{{ url_for('static', filename='js/decision_details.js') }}"></script>
 {% endblock %}

@@ -134,11 +134,11 @@ function TopNav({ title, breadcrumb }: { title: string; breadcrumb?: string[] })
 
 function AppLayout({ active, title, breadcrumb, children }: any) {
   return (
-    <div style={{ width: FW, height: FH, display: "flex", background: C.g50, fontFamily: "'Inter',-apple-system,sans-serif", overflow: "hidden" }}>
+    <div style={{ width: FW, minHeight: FH, display: "flex", background: C.g50, fontFamily: "'Inter',-apple-system,sans-serif" }}>
       <Sidebar active={active} />
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
         <TopNav title={title} breadcrumb={breadcrumb} />
-        <div style={{ flex: 1, overflowY: "auto", padding: 28 }}>{children}</div>
+        <div style={{ flex: 1, padding: 28 }}>{children}</div>
       </div>
     </div>
   );
@@ -167,8 +167,8 @@ function Thumb({ label, children }: { label: string; children: React.ReactNode }
             <span style={{ fontSize: 3.5, color: "#9CA3AF" }}>edrp.enterprise.com</span>
           </div>
         </div>
-        <div style={{ width: TW, height: TH, overflow: "hidden", position: "relative" }}>
-          <div style={{ width: FW, height: FH, transform: `scale(${SC})`, transformOrigin: "top left", position: "absolute", top: 0, left: 0 }}>
+        <div style={{ width: TW, minHeight: TH, overflow: "hidden", position: "relative" }}>
+          <div style={{ width: FW, minHeight: FH, zoom: SC }}>
             {children}
           </div>
         </div>

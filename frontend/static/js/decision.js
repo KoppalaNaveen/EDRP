@@ -1,14 +1,18 @@
 let allDecisions = [];
+let currentStatusFilter = 'All';
 let currentPage = 1;
 const rowsPerPage = 5;
 
 document.addEventListener("DOMContentLoaded", () => {
     fetchDecisions();
 
-    document.getElementById("searchInput").addEventListener("input", function() {
-        currentPage = 1;
-        renderTable();
-    });
+    const searchInput = document.getElementById("searchInput");
+    if (searchInput) {
+        searchInput.addEventListener("input", function() {
+            currentPage = 1;
+            renderTable();
+        });
+    }
 });
 
 async function fetchDecisions() {
@@ -22,14 +26,82 @@ async function fetchDecisions() {
     }
 }
 
+function updateTabCounts() {
+    let counts = {
+        'All': allDecisions.length,
+        'Draft': 0,
+        'Pending': 0,
+        'In Review': 0,
+        'Approved': 0,
+        'Rejected': 0
+    };
+
+    allDecisions.forEach(d => {
+        if (counts.hasOwnProperty(d.status)) {
+            counts[d.status]++;
+        }
+    });
+
+    const mapping = {
+        'count-all': 'All',
+        'count-draft': 'Draft',
+        'count-pending': 'Pending',
+        'count-review': 'In Review',
+        'count-approved': 'Approved',
+        'count-rejected': 'Rejected'
+    };
+
+    for (let id in mapping) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.innerText = counts[mapping[id]];
+        }
+    }
+}
+
+function setFilter(status, btnElement) {
+    currentStatusFilter = status;
+    currentPage = 1;
+
+    // Reset styles on all tabs
+    const tabs = document.querySelectorAll('#decisionTabs .nav-link');
+    tabs.forEach(tab => {
+        tab.classList.remove('active', 'fw-bold', 'border-bottom', 'border-primary', 'border-3', 'text-primary');
+        tab.classList.add('fw-medium', 'text-secondary');
+        const badge = tab.querySelector('.badge');
+        if (badge) {
+            badge.className = 'badge bg-light text-secondary rounded-pill ms-1';
+        }
+    });
+
+    // Set active styles on clicked tab
+    if (btnElement) {
+        btnElement.classList.add('active', 'fw-bold', 'border-bottom', 'border-primary', 'border-3', 'text-primary');
+        btnElement.classList.remove('fw-medium', 'text-secondary');
+        const badge = btnElement.querySelector('.badge');
+        if (badge) {
+            badge.className = 'badge bg-primary bg-opacity-10 text-primary rounded-pill ms-1';
+        }
+    }
+
+    renderTable();
+}
+
 function renderTable() {
+    updateTabCounts();
     const tbody = document.getElementById("decisionsTableBody");
-    const searchQuery = document.getElementById("searchInput").value.toLowerCase();
+    const searchInput = document.getElementById("searchInput");
+    const searchQuery = searchInput ? searchInput.value.toLowerCase() : "";
     
-    let filtered = allDecisions.filter(d => 
-        d.title.toLowerCase().includes(searchQuery) || 
-        d.description.toLowerCase().includes(searchQuery)
-    );
+    let filtered = allDecisions.filter(d => {
+        const matchesSearch = 
+            (d.title && d.title.toLowerCase().includes(searchQuery)) || 
+            (d.description && d.description.toLowerCase().includes(searchQuery));
+        
+        const matchesStatus = currentStatusFilter === 'All' || d.status === currentStatusFilter;
+        
+        return matchesSearch && matchesStatus;
+    });
 
     const totalPages = Math.ceil(filtered.length / rowsPerPage) || 1;
     if (currentPage > totalPages) currentPage = totalPages;
@@ -51,16 +123,21 @@ function renderTable() {
 
             tbody.innerHTML += `
                 <tr>
-                    <td class="ps-4 fw-semibold">#${d.id}</td>
-                    <td>
-                        <a href="/decision/${d.id}" class="text-decoration-none fw-bold text-primary">${d.title}</a>
-                        <div class="small text-muted text-truncate" style="max-width:300px;">${d.description}</div>
+                    <td class="ps-4 fw-semibold">
+                        <a href="/decision/${d.id}" class="text-decoration-none fw-bold text-primary">DEC-${d.id}</a>
+                        <div class="small text-muted text-truncate" style="max-width:200px;">${d.title}</div>
                     </td>
-                    <td><span class="badge ${statusBadge}">${d.status}</span></td>
+                    <td class="text-dark">${d.category_name || 'Uncategorized'}</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="avatar-sm bg-light text-primary rounded-circle d-flex align-items-center justify-content-center" style="width:24px;height:24px;font-size:10px;font-weight:bold;">${d.creator_initials || 'U'}</div>
+                            <span class="text-dark small fw-medium">${d.creator_name || 'Unknown User'}</span>
+                        </div>
+                    </td>
                     <td class="text-muted small">${dateStr}</td>
+                    <td><span class="badge ${statusBadge}">${d.status}</span></td>
                     <td class="text-end pe-4">
-                        <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditModal(${d.id})"><i class="bi bi-pencil"></i></button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteDecision(${d.id})"><i class="bi bi-trash"></i></button>
+                        <a href="/decision/${d.id}" class="btn btn-sm btn-outline-primary fw-semibold px-3">View</a>
                     </td>
                 </tr>
             `;

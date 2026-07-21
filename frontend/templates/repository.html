@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block css %}
+<style>
+.repo-card {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    transition: box-shadow 0.2s, transform 0.15s;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.repo-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.09);
+    transform: translateY(-2px);
+}
+.repo-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0F172A;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.repo-card-desc {
+    font-size: 13px;
+    color: #64748B;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+.search-hero {
+    background: linear-gradient(135deg, #0F172A 0%, #1E3A5F 100%);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    margin-bottom: 1.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Search -->
+<div class="search-hero">
+    <h2 class="fw-bold text-white mb-1">📚 Knowledge Repository</h2>
+    <p class="mb-3" style="color:#94A3B8;font-size:14px;">Search and explore all approved decisions. Institutional knowledge at your fingertips.</p>
+    <div class="input-group" style="max-width:600px;">
+        <span class="input-group-text" style="background:#1E293B;border-color:#334155;">
+            <i data-lucide="search" style="width:18px;height:18px;color:#64748B;"></i>
+        </span>
+        <input type="text" id="repoSearch" class="form-control" placeholder="Search approved decisions by title, description, or category..."
+               style="background:#1E293B;border-color:#334155;color:#F8FAFC;" oninput="filterRepo()">
+        <button class="btn" style="background:#2563EB;color:white;border-color:#2563EB;" onclick="filterRepo()">Search</button>
+    </div>
+    <div class="d-flex gap-2 mt-3 flex-wrap">
+        <span class="text-muted" style="font-size:12px;">Filter:</span>
+        <button id="catAll" class="btn btn-sm px-3 fw-semibold" style="background:#2563EB;color:white;font-size:11px;border-radius:20px;" onclick="setCat('', this)">All</button>
+        <div id="categoryBtns" class="d-flex gap-2 flex-wrap"></div>
+    </div>
+</div>
+
+<!-- Stats bar -->
+<div class="d-flex align-items-center gap-4 mb-4">
+    <div class="text-muted" style="font-size:13px;">
+        <span id="repoCount" class="fw-bold text-dark">—</span> approved decisions
+    </div>
+    <div class="text-muted" style="font-size:13px;">
+        <span id="repoCategoryCount" class="fw-bold text-dark">—</span> categories
+    </div>
+</div>
+
+<!-- Cards Grid -->
+<div id="repoGrid" class="row g-3">
+    <div class="col-12 text-center py-5 text-muted">
+        <div class="spinner-border spinner-border-sm me-2"></div>Loading knowledge base...
+    </div>
+</div>
+
+<!-- Pagination -->
+<div class="d-flex justify-content-between align-items-center mt-4">
+    <span id="repoPaginationInfo" class="text-muted small"></span>
+    <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-secondary px-3" id="repoBtnPrev" onclick="prevPage()" disabled>Previous</button>
+        <button class="btn btn-sm btn-outline-secondary px-3" id="repoBtnNext" onclick="nextPage()" disabled>Next</button>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://127.0.0.1:8000";
+</script>
+<script src="{{ url_for('static', filename='js/repository.js') }}"></script>
+{% endblock %}

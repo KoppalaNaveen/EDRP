@@ -37,3 +37,13 @@ class User(Base):
     phone = Column(String(20))
 
     is_active = Column(Boolean, default=True)
+
+
+class VerificationCode(Base):
+    __tablename__ = "verification_codes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(100), index=True, nullable=False)
+    code = Column(String(10), nullable=False)
+    expires_at = Column(Integer, nullable=False)  # Unix timestamp
+    purpose = Column(String(20), nullable=False)  # "register", "reset_password"

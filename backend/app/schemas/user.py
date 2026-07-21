@@ -11,10 +11,28 @@ class UserRegister(BaseModel):
     password: str = Field(..., min_length=6)
     role_id: int
     team_id: int
-    employee_id: str
+    employee_id: Optional[str] = None
     designation: Optional[str] = None
     phone: Optional[str] = None
+    verification_code: str = Field(..., min_length=6, max_length=6)
 
+# -----------------------------
+# Code Verification
+# -----------------------------
+class SendCodeRequest(BaseModel):
+    email: EmailStr
+    purpose: str = Field(..., pattern="^(register|reset_password)$")
+    is_resend: bool = False
+
+class VerifyCodeRequest(BaseModel):
+    email: EmailStr
+    code: str = Field(..., min_length=6, max_length=6)
+    purpose: str = Field(..., pattern="^(register|reset_password)$")
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    code: str = Field(..., min_length=6, max_length=6)
+    new_password: str = Field(..., min_length=6)
 
 # -----------------------------
 # User Login

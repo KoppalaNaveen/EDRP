@@ -28,6 +28,8 @@ class Review(Base):
     )
 
     comments = Column(Text)
+    deadline = Column(DateTime(timezone=True), nullable=True)
+    approval_type = Column(String(50), nullable=True)
 
     reviewed_at = Column(
         DateTime(timezone=True),
@@ -36,3 +38,14 @@ class Review(Base):
 
     decision = relationship("Decision")
     reviewer = relationship("User")
+
+    @property
+    def reviewer_name(self):
+        return self.reviewer.full_name if self.reviewer else None
+
+    @property
+    def reviewer_initials(self):
+        if not self.reviewer or not self.reviewer.full_name:
+            return "U"
+        parts = self.reviewer.full_name.split()
+        return "".join([p[0].upper() for p in parts])[:2]

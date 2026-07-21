@@ -421,26 +421,43 @@
                 
                 <!-- ROW 1 -->
                 <div class="row g-4 mb-4">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label-custom">Full Name <span>*</span></label>
                         <div class="input-group-custom">
                             <input type="text" name="full_name" class="input-field" placeholder="John David" required>
                         </div>
                         <div class="input-hint">Enter your legal full name</div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label-custom">Official Email <span>*</span></label>
                         <div class="input-group-custom">
-                            <input type="email" name="email" class="input-field" placeholder="john@company.com" required>
+                            <input type="email" id="email" name="email" class="input-field" placeholder="john@company.com" required>
+                            <button type="button" id="btnVerifyEmail" class="btn btn-sm" style="background:#F1F5F9; color:#2563EB; font-weight:700; margin-right: 4px; padding: 4px 10px; font-size:12px; border-radius:6px; border:none;">Verify</button>
                         </div>
                         <div class="input-hint">Use your work email address</div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label-custom">Employee ID <span>*</span></label>
-                        <div class="input-group-custom">
-                            <input type="text" id="employee_id" name="employee_id" class="input-field" placeholder="EMP1024" readonly required>
+                        
+                        <!-- Verification Code Field (Hidden by Default) -->
+                        <div id="verificationCodeContainer" style="display: none; margin-top: 12px;">
+                            <label class="form-label-custom">Verification Code <span>*</span></label>
+                            <div class="input-group-custom">
+                                <input type="text" id="verification_code" name="verification_code" class="input-field" placeholder="123456" maxlength="6">
+                                <button type="button" id="btnResendCode" class="btn btn-sm" style="background:#FEF2F2; color:#EF4444; font-weight:700; margin-right: 4px; padding: 4px 10px; font-size:12px; border-radius:6px; border:none;">Resend OTP</button>
+                                <button type="button" id="btnVerifyCode" class="btn btn-sm" style="background:#F1F5F9; color:#2563EB; font-weight:700; margin-right: 4px; padding: 4px 10px; font-size:12px; border-radius:6px; border:none;">Verify</button>
+                            </div>
+                            <div class="input-hint" id="verificationHint" style="color:#F59E0B">Code sent to email. Valid for 10 minutes.</div>
                         </div>
-                        <div class="input-hint">As assigned by your HR department</div>
+
+                        <!-- Generated Employee ID Field (Hidden by Default, shown after verification) -->
+                        <div id="employeeIdContainer" style="display: none; margin-top: 16px;">
+                            <label class="form-label-custom">Employee ID <span>*</span></label>
+                            <div class="input-group-custom">
+                                <input type="text" id="employee_id" name="employee_id" class="input-field" placeholder="EMP1024" readonly required>
+                            </div>
+                            <div class="input-hint" style="color: #2563EB; font-weight: 700; background: #EFF6FF; padding: 6px 10px; border-radius: 6px; display: inline-block; margin-top: 8px;">
+                                <i data-lucide="alert-circle" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 4px;"></i>
+                                Don't forget this ID
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -601,8 +618,14 @@
     <script>
         lucide.createIcons();
 
-        // 1. Employee ID Auto Generation Logic
-        function generateEmployeeId(prefix) {
+        // ID Auto Generation Logic
+        function generateEmployeeId(roleId) {
+            let prefix = "EMP";
+            if (roleId === "1") prefix = "AD";
+            else if (roleId === "2") prefix = "MN";
+            else if (roleId === "3") prefix = "EMP";
+            else if (roleId === "4") prefix = "RW";
+
             const num = Math.floor(1000 + Math.random() * 9000);
             return prefix + num;
         }
@@ -611,19 +634,21 @@
         const roleInputs = document.querySelectorAll('input[name="role_id"]');
         const roleCards = document.querySelectorAll('.role-card');
 
-        // Initial generation based on selected
-        empIdInput.value = generateEmployeeId("EMP");
+        function updateEmpId() {
+            const selectedRole = document.querySelector('input[name="role_id"]:checked').value;
+            empIdInput.value = generateEmployeeId(selectedRole);
+        }
 
         roleInputs.forEach(input => {
             input.addEventListener('change', function() {
                 // Update cards styling
                 roleCards.forEach(card => card.classList.remove('active'));
                 this.parentElement.classList.add('active');
-
-                // Generate new ID
-                let prefix = "EMP";
-
-                empIdInput.value = generateEmployeeId(prefix);
+                
+                // Regenerate ID if email is already verified
+                if (window.isEmailVerified) {
+                    updateEmpId();
+                }
             });
         });
 
@@ -724,6 +749,10 @@
 
             // Terms check
             if (!terms.checked) isValid = false;
+            
+            // Verification Code check
+            const codeInput = document.getElementById('verification_code');
+            if (codeInput.value.length !== 6) isValid = false;
 
             // Update Submit button
             if (isValid) {
@@ -736,6 +765,134 @@
         pw.addEventListener('input', checkValidation);
         cpw.addEventListener('input', checkValidation);
         terms.addEventListener('change', checkValidation);
+        document.getElementById('verification_code').addEventListener('input', checkValidation);
+
+        // Send Verification Code Logic
+        document.getElementById('btnVerifyEmail').addEventListener('click', async function() {
+            const emailInput = document.getElementById('email');
+            if (!emailInput.value) {
+                alert("Please enter your email first.");
+                return;
+            }
+            
+            this.textContent = "Sending...";
+            this.disabled = true;
+            
+            try {
+                const res = await fetch('/api/send-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: emailInput.value, purpose: 'register' })
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    document.getElementById('verificationCodeContainer').style.display = 'block';
+                    this.textContent = "Sent!";
+                    this.style.background = "#D1FAE5";
+                    this.style.color = "#059669";
+                } else {
+                    alert("Error: " + (data.detail || "Failed to send code"));
+                    this.textContent = "Verify";
+                    this.disabled = false;
+                }
+            } catch (err) {
+                alert("Error sending request.");
+                this.textContent = "Verify";
+                this.disabled = false;
+            }
+        });
+
+        // Resend Verification Code Logic
+        document.getElementById('btnResendCode').addEventListener('click', async function() {
+            const emailInput = document.getElementById('email');
+            if (!emailInput.value) {
+                alert("Please enter your email first.");
+                return;
+            }
+            
+            this.textContent = "Resending...";
+            this.disabled = true;
+            
+            try {
+                const res = await fetch('/api/send-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: emailInput.value, purpose: 'register', is_resend: true })
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    this.textContent = "Sent!";
+                    this.style.background = "#D1FAE5";
+                    this.style.color = "#059669";
+                    document.getElementById('verificationHint').textContent = "New code sent to email. Valid for 5 minutes.";
+                    document.getElementById('verificationHint').style.color = "#F59E0B";
+                    
+                    setTimeout(() => {
+                        this.textContent = "Resend OTP";
+                        this.style.background = "#FEF2F2";
+                        this.style.color = "#EF4444";
+                        this.disabled = false;
+                    }, 5000);
+                } else {
+                    alert("Error: " + (data.detail || "Failed to send code"));
+                    this.textContent = "Resend OTP";
+                    this.disabled = false;
+                }
+            } catch (err) {
+                alert("Error sending request.");
+                this.textContent = "Resend OTP";
+                this.disabled = false;
+            }
+        });
+
+        // Verify Code Logic
+        document.getElementById('btnVerifyCode').addEventListener('click', async function() {
+            const emailInput = document.getElementById('email');
+            const codeInput = document.getElementById('verification_code');
+            if (!codeInput.value || codeInput.value.length !== 6) {
+                alert("Please enter a valid 6-digit code.");
+                return;
+            }
+            
+            this.textContent = "Verifying...";
+            this.disabled = true;
+            
+            try {
+                const res = await fetch('/api/verify-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: emailInput.value, code: codeInput.value, purpose: 'register' })
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    this.textContent = "Verified!";
+                    this.style.background = "#D1FAE5";
+                    this.style.color = "#059669";
+                    document.getElementById('verificationHint').textContent = "Code verified successfully.";
+                    document.getElementById('verificationHint').style.color = "#10B981";
+                    
+                    window.isEmailVerified = true;
+                    document.getElementById('employeeIdContainer').style.display = 'block';
+                    updateEmpId();
+                    
+                    lucide.createIcons(); // refresh icons for new dynamic elements
+                } else {
+                    alert("Error: " + (data.detail || "Invalid code"));
+                    this.textContent = "Verify";
+                    this.disabled = false;
+                }
+            } catch (err) {
+                alert("Error verifying code.");
+                this.textContent = "Verify";
+                this.disabled = false;
+            }
+        });
 
         // Password visibility toggles
         document.getElementById('togglePw').addEventListener('click', () => {

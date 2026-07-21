@@ -17,14 +17,53 @@ app.secret_key = "expert_decision_platform"
 # FastAPI Backend URL
 API_URL = "http://127.0.0.1:8000"
 
+@app.context_processor
+def inject_global_stats():
+    if not session.get("logged_in"):
+        return {}
+    
+    try:
+        user_id = session.get("user_id")
+        token = session.get("token")
+        if not user_id or not token:
+            return {}
+            
+        headers = {"Authorization": f"Bearer {token}"}
+        response = requests.get(f"{API_URL}/dashboard/{user_id}", headers=headers, timeout=2.0)
+        if response.status_code == 200:
+            data = response.json()
+            return {
+                "unread_notifications_count": data.get("unread_notifications_count", 0),
+                "pending_reviews": data.get("pending_reviews", 0)
+            }
+    except Exception:
+        pass
+    
+    return {"unread_notifications_count": 0, "pending_reviews": 0}
 
 # ===========================
 # HOME
 # ===========================
 
 @app.route("/")
+def index():
+    try:
+        # Check backend server health
+        requests.get(f"{API_URL}/users/", timeout=1.5)
+        return redirect(url_for("home"))
+    except requests.exceptions.RequestException:
+        # Server or network issue exists: show 404-error page
+        return redirect(url_for("error_404"))
+
+@app.route("/landing")
 def home():
     return render_template("landing.html")
+
+# Global error handler for backend connection issues
+@app.errorhandler(requests.exceptions.RequestException)
+def handle_requests_error(e):
+    return redirect(url_for("error_404"))
+
 
 
 # ===========================
@@ -87,7 +126,8 @@ def register():
             "team_id": int(request.form.get("team_id", 1)),
             "employee_id": request.form.get("employee_id", ""),
             "designation": request.form.get("designation", ""),
-            "phone": request.form.get("phone", "")
+            "phone": request.form.get("phone", ""),
+            "verification_code": request.form.get("verification_code", "")
         }
 
         response = requests.post(
@@ -103,9 +143,103 @@ def register():
             flash("Registration Successful", "success")
             return redirect(url_for("login"))
 
-        flash(f"Registration Failed: {response.text}", "danger")
+        try:
+            error_msg = response.json().get("detail", "Registration Failed")
+        except:
+            error_msg = response.text
+        flash(f"Registration Failed: {error_msg}", "danger")
 
     return render_template("register.html")
+
+# ===========================
+# API PROXIES (Email Verification & Password Reset)
+# ===========================
+from flask import jsonify
+
+@app.route("/api/send-code", methods=["POST"])
+def send_code():
+    data = request.json
+    try:
+        response = requests.post(
+            f"{API_URL}/users/send-verification-code",
+            json=data
+        )
+        if response.status_code == 200:
+            return jsonify(response.json()), 200
+        return jsonify(response.json()), response.status_code
+    except requests.exceptions.RequestException as e:
+        return jsonify({"detail": "Backend connection error. Ensure the FastAPI backend is running."}), 500
+    except ValueError:
+        return jsonify({"detail": "Received an invalid response from the backend server."}), 500
+
+@app.route("/api/verify-code", methods=["POST"])
+def verify_code():
+    data = request.json
+    try:
+        response = requests.post(
+            f"{API_URL}/users/check-verification-code",
+            json=data
+        )
+        if response.status_code == 200:
+            return jsonify(response.json()), 200
+        return jsonify(response.json()), response.status_code
+    except requests.exceptions.RequestException as e:
+        return jsonify({"detail": "Backend connection error. Ensure the FastAPI backend is running."}), 500
+    except ValueError:
+        return jsonify({"detail": "Received an invalid response from the backend server."}), 500
+
+@app.route("/api/reset-password", methods=["POST"])
+def reset_password():
+    data = request.json
+    try:
+        response = requests.post(
+            f"{API_URL}/users/reset-password",
+            json=data
+        )
+        if response.status_code == 200:
+            return jsonify(response.json()), 200
+        return jsonify(response.json()), response.status_code
+    except requests.exceptions.RequestException as e:
+        return jsonify({"detail": "Backend connection error. Ensure the FastAPI backend is running."}), 500
+    except ValueError:
+        return jsonify({"detail": "Received an invalid response from the backend server."}), 500
+
+# ===========================
+# NOTIFICATIONS PROXIES
+# ===========================
+
+@app.route("/notifications/<int:user_id>")
+def get_notifications(user_id):
+    if "token" not in session:
+        return jsonify({"detail": "Unauthorized"}), 401
+    headers = {"Authorization": f"Bearer {session['token']}"}
+    try:
+        response = requests.get(f"{API_URL}/notifications/{user_id}", headers=headers, timeout=5)
+        return jsonify(response.json()), response.status_code
+    except Exception as e:
+        return jsonify([]), 200
+
+@app.route("/notifications/<int:user_id>/mark-all-read", methods=["PUT"])
+def mark_all_read(user_id):
+    if "token" not in session:
+        return jsonify({"detail": "Unauthorized"}), 401
+    headers = {"Authorization": f"Bearer {session['token']}"}
+    try:
+        response = requests.put(f"{API_URL}/notifications/{user_id}/mark-all-read", headers=headers, timeout=5)
+        return jsonify(response.json()), response.status_code
+    except Exception as e:
+        return jsonify({"detail": "Error"}), 500
+
+@app.route("/notifications/<int:user_id>/clear-all", methods=["DELETE"])
+def clear_all_notifications(user_id):
+    if "token" not in session:
+        return jsonify({"detail": "Unauthorized"}), 401
+    headers = {"Authorization": f"Bearer {session['token']}"}
+    try:
+        response = requests.delete(f"{API_URL}/notifications/{user_id}/clear-all", headers=headers, timeout=5)
+        return jsonify(response.json()), response.status_code
+    except Exception as e:
+        return jsonify({"detail": "Error"}), 500
 
 # ===========================
 # DASHBOARD
@@ -141,9 +275,44 @@ def dashboard():
     else:
         template = "employee_dashboard.html"
 
+    total_decisions = dashboard.get("total_decisions", 0)
+    approved_decisions = dashboard.get("approved_decisions", 0)
+    pending_reviews = dashboard.get("pending_reviews", 0)
+    rejected_decisions = dashboard.get("rejected_decisions", 0)
+    draft_decisions = dashboard.get("draft_decisions", 0)
+
+    # Pre-compute bar widths to avoid Jinja arithmetic inside style attributes
+    approved_pct = int(approved_decisions / total_decisions * 100) if total_decisions > 0 else 0
+    pending_pct  = int(pending_reviews    / total_decisions * 100) if total_decisions > 0 else 0
+    rejected_pct = int(rejected_decisions / total_decisions * 100) if total_decisions > 0 else 0
+    draft_pct    = int(draft_decisions    / total_decisions * 100) if total_decisions > 0 else 0
+
     return render_template(
         template,
-        dashboard=dashboard
+        dashboard=dashboard,
+        # Unpack for convenient direct access in templates
+        total_users=dashboard.get("total_users", 0),
+        active_users=dashboard.get("active_users", 0),
+        total_decisions=total_decisions,
+        pending_reviews=pending_reviews,
+        total_replays=dashboard.get("total_replays", 0),
+        approved_decisions=approved_decisions,
+        rejected_decisions=rejected_decisions,
+        draft_decisions=draft_decisions,
+        total_audit_logs=dashboard.get("total_audit_logs", 0),
+        system_health=dashboard.get("system_health", "99%"),
+        recent_decisions=dashboard.get("recent_decisions", []),
+        recent_reviews=dashboard.get("recent_reviews", []),
+        recent_replays=dashboard.get("recent_replays", []),
+        recent_users=dashboard.get("recent_users", []),
+        recent_audit_logs=dashboard.get("recent_audit_logs", []),
+        approval_flow=dashboard.get("approval_flow", []),
+        unread_notifications_count=dashboard.get("unread_notifications_count", 0),
+        # Pre-computed percentage widths for progress bars
+        approved_pct=approved_pct,
+        pending_pct=pending_pct,
+        rejected_pct=rejected_pct,
+        draft_pct=draft_pct,
     )
 
 # ===========================
@@ -184,6 +353,16 @@ def teams():
 
     return render_template("teams.html")
 
+
+# ===========================
+# CREATE DECISION WIZARD
+# ===========================
+
+@app.route("/create_decision")
+def create_decision():
+    if "token" not in session:
+        return redirect(url_for("login"))
+    return render_template("create_decision.html")
 
 # ===========================
 # DECISIONS
@@ -390,6 +569,18 @@ def logout():
 
     return redirect(url_for("login"))
 
+
+# ===========================
+# ERROR HANDLERS
+# ===========================
+
+@app.route("/404-error")
+def error_404():
+    return render_template("404.html"), 404
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return redirect(url_for("error_404"))
 
 # ===========================
 # START APPLICATION
